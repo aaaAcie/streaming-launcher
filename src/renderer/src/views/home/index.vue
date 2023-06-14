@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-14 16:37:05
+ * @LastEditTime: 2023-06-14 17:58:17
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -20,8 +20,8 @@ const msg = ref("");
 const keyMsg = ref([]);
 const openUE = ref(false)
 const openTurn = ref(false)
-// const serverPath = ".\\resources\\推流综合服务器"
-const serverPath = "..\\推流综合服务器"
+const serverPath = ".\\resources\\推流综合服务器"
+// const serverPath = "..\\推流综合服务器"
 
 const serverJSONPath = serverPath + "\\config.json"
 
@@ -99,8 +99,8 @@ watchEffect(() => {
 const handleJump = async(data) => {
   if (data === "MXDATA") {
     console.log("MXDATA");
-    // tabAdd("http://115.238.181.246:18288/customPage/mxdata?menu=project", "ddd");
-    tabAdd(keyUrl.value + "/server/redirectBlankPushStreamServerURL", "ddd");
+    tabAdd("http://115.238.181.246:18288/customPage/mxdata?menu=project", "ddd");
+    // tabAdd(keyUrl.value + "/server/redirectBlankPushStreamServerURL", "ddd");
 
   } else if (data === "EVR") {
     console.log("EVR");
@@ -108,7 +108,7 @@ const handleJump = async(data) => {
     // openEXE("mxxx.exe", ".\\resources\\win-unpacked", []);
     // 生产
     // openEXE('StartMxdata.bat', '..\\Windows')
-    openEXE("mxxx.exe", "..\\MX-Localdev", []);
+    openEXE("LauncherMxData.exe", "..\\Windows", []);
     // openEXE("LauncherEVR.exe", "..\\Windows",cmdArray);
   } else {
     defaultConfig.value['SFUPort'] = portConfig.StreamerPort - '10'
@@ -133,22 +133,14 @@ const handleJump = async(data) => {
       // test.ps1 会去打开cirrus3
       openEXE("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test.ps1'], {port:portConfig.HttpPort, address:ip.value});
     }else{
+      // 直接进入这里
       openEXE("cirrus3.3.exe", serverPath, [], {port:portConfig.HttpPort, address:ip.value});
     }
 
     if (openUE.value) {
       // openEXE("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
       openEXE(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:portConfig.HttpPort, address:ip.value});
-
     }
-
-    // 生产
-    // openEXE('cirrus3.2.exe', '..\\推流综合服务器',cmdArray, {port:portConfig.HttpPort, address:ip.value})
-    // if(openUE.value){
-    //   // openEXE("MxWorld.exe", "..\\Windows", cmdArray2, {port:portConfig.HttpPort, address:ip.value});
-    //   openEXE(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:portConfig.HttpPort, address:ip.value});
-
-    // }
   }
 };
 
@@ -211,12 +203,12 @@ const copyToClipboard = () => {
   <div class="features">
     <div class="feature-item">
       <article>
-        <h2 class="title" @click="handleJump('MXDATA')">推流测试地址</h2>
+        <h2 class="title" @click="handleJump('MXDATA')">MXDATA</h2>
       </article>
     </div>
     <div class="feature-item">
       <article>
-        <h2 class="title" @click="handleJump('EVR')">网页服务器</h2>
+        <h2 class="title" @click="handleJump('EVR')">EVR</h2>
       </article>
     </div>
     <div class="feature-item">
@@ -232,7 +224,7 @@ const copyToClipboard = () => {
         </p> -->
         <p class="detail">
           <div v-for="(k, v) in portConfig" :key="k">
-            <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox>
+            <!-- <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox> -->
             <span style="color: #73a5b1;">{{ v }}:</span>
             <input type="text" v-model="portConfig[v]" />
           </div>
