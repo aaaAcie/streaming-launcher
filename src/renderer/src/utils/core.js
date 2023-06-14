@@ -13,8 +13,10 @@ export const openEXE = async (cmdStr, cmdPath = "", cmdArray = [], updateConfig=
   console.log(response); // prints out 'pong'
   const {pid} = response
   if (cmdStr.startsWith('cirrus')) {
-    port = cmdArray[1]
-    address = cmdArray[7]
+    // port = cmdArray[1]
+    // address = cmdArray[7]
+    port = updateConfig['port']
+    address = updateConfig['address']
     // 调用接口，更新cirrus的 [serverPid]
     const data = await updateData({
       address,
@@ -67,14 +69,25 @@ export const writeJson = async (finalJson,path) => {
   // console.log(response); // prints out 'pong'
   return response
 };
-const updateData = async(streamData) => {
+const updateData = async(streamData,tryTime=1,time=3000) => {
+  if (tryTime > 5) {
+    // 每隔5s尝试一次 尝试5次
+    console.log('与manager建立连接失败')
+    return streamData + '与manager建立连接失败'
+  }
   setTimeout(() => {
     return new Promise(async (resolve, reject) => {
-      const { data } = await updatePushStreamServer({
+      console.log('updateData=========', tryTime)
+      const {data}  = await updatePushStreamServer({
         ...streamData
       })
-      resolve(data)
+      console.log(data)
+      if (data.code===1001) {
+        resolve(data)
+      }else{
+        updateData(streamData,tryTime+1,5000)
+      }
     })
-  }, 2000)
+  }, time)
   
 }

@@ -7,7 +7,8 @@ const BASE_URL = 'http://115.238.181.246:10010'
 let BASE_URL_Server
 const geturlLocal = () => {
   let url
-  if (localStorage.MatchmakerAddress && localStorage.managerPort) {
+  if (typeof localStorage.MatchmakerAddress !== 'undefined') {
+    console.log('localStorage.MatchmakerAddress: ',localStorage.MatchmakerAddress,localStorage.managerPort);
     url = 'http://' + localStorage.MatchmakerAddress + ':' + localStorage.managerPort
   }else{
     url = "http://192.168.2.128:83"
@@ -31,7 +32,7 @@ const request = axios.create({
 
 
 function getBaseURL (url) {
-  console.log(BASE_URL_Server+url)
+  // console.log(BASE_URL_Server+url)
   if (url.startsWith('/server')) {
     // return "http://192.168.6.227:83" // 对应83端口
     // return "http://192.168.2.128:83" // 对应83端口

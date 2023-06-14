@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-13 16:01:06
+ * @LastEditTime: 2023-06-14 16:37:05
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -19,6 +19,7 @@ const router = useRouter()
 const msg = ref("");
 const keyMsg = ref([]);
 const openUE = ref(false)
+const openTurn = ref(false)
 // const serverPath = ".\\resources\\推流综合服务器"
 const serverPath = "..\\推流综合服务器"
 
@@ -40,7 +41,7 @@ const defaultConfig = ref({})
 const portConfig = reactive({
   HttpPort: '',
   StreamerPort: '',
-  TurnPort: '19001'
+  TurnPort: ''
 })
 const keyUrl = ref('')
 // const portConfig = useConfigDealer()
@@ -82,6 +83,8 @@ getCofig('CONFIG', serverJSONPath).then(d => {
   defaultConfig.value = d
   portConfig.HttpPort = d.HttpPort
   portConfig.StreamerPort = d.StreamerPort
+  portConfig.TurnPort = d.TurnPort
+
   keyUrl.value = 'http://' + d.MatchmakerAddress + ':' + d.managerPort
 })
 
@@ -108,24 +111,30 @@ const handleJump = async(data) => {
     openEXE("mxxx.exe", "..\\MX-Localdev", []);
     // openEXE("LauncherEVR.exe", "..\\Windows",cmdArray);
   } else {
+    defaultConfig.value['SFUPort'] = portConfig.StreamerPort - '10'
+    defaultConfig.value['PublicIp'] = ip.value
     // 覆盖json文件
     let finalJson = { ...defaultConfig.value, ...portConfig}
     console.log(finalJson)
     let res = await writeJson(finalJson, serverJSONPath)
     console.log(res)
 
-    let cmdArray = ['--HttpPort', '919', '--StreamerPort', '8888', '--SFUPort', '8800', '--PublicIp', '127.0.0.1']
-    cmdArray[1] = portConfig.HttpPort
-    cmdArray[3] = portConfig.StreamerPort
-    cmdArray[5] = portConfig.StreamerPort - '10'
-    cmdArray[7] = ip.value
+    // let cmdArray = ['--HttpPort', '919', '--StreamerPort', '8888', '--SFUPort', '8800', '--PublicIp', '127.0.0.1']
+    // cmdArray[1] = portConfig.HttpPort
+    // cmdArray[3] = portConfig.StreamerPort
+    // cmdArray[5] = portConfig.StreamerPort - '10'
+    // cmdArray[7] = ip.value
 
     let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
     cmdArray2[2] = '-PixelStreamingPort=' + portConfig.StreamerPort
 
     // 开发
-    openEXE("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test.ps1']);
-    openEXE("cirrus3.2.exe", serverPath, cmdArray);
+    if (openTurn.value) {
+      // test.ps1 会去打开cirrus3
+      openEXE("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test.ps1'], {port:portConfig.HttpPort, address:ip.value});
+    }else{
+      openEXE("cirrus3.3.exe", serverPath, [], {port:portConfig.HttpPort, address:ip.value});
+    }
 
     if (openUE.value) {
       // openEXE("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
@@ -134,9 +143,9 @@ const handleJump = async(data) => {
     }
 
     // 生产
-    // openEXE('cirrus3.2.exe', '..\\推流综合服务器',cmdArray)
+    // openEXE('cirrus3.2.exe', '..\\推流综合服务器',cmdArray, {port:portConfig.HttpPort, address:ip.value})
     // if(openUE.value){
-    //   // openEXE("MxWorld.exe", "..\\Windows", cmdArray2);
+    //   // openEXE("MxWorld.exe", "..\\Windows", cmdArray2, {port:portConfig.HttpPort, address:ip.value});
     //   openEXE(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:portConfig.HttpPort, address:ip.value});
 
     // }
@@ -222,10 +231,11 @@ const copyToClipboard = () => {
           <div v-for="(m, index) in keyMsg.slice(-2)" :key="index">{{ m }}</div>
         </p> -->
         <p class="detail">
-        <div v-for="(k, v) in portConfig" :key="k">
-          <span style="color: #73a5b1;">{{ v }}:</span>
-          <input type="text" v-model="portConfig[v]" />
-        </div>
+          <div v-for="(k, v) in portConfig" :key="k">
+            <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox>
+            <span style="color: #73a5b1;">{{ v }}:</span>
+            <input type="text" v-model="portConfig[v]" />
+          </div>
         </p>
       </article>
     </div>
