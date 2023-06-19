@@ -52,23 +52,22 @@ export function createEXE2(cmdStr, cmdPath) {
   console.log('-------------', workerProcess.pid)
   return workerProcess
 }
-export function createEXE3(cmdStr, cmdPath, cmdArray) {
-  const win = BrowserWindow.getFocusedWindow();
-  
+export function createEXE3(cmdStr, cmdPath, cmdArray,mainWindow) {
+  cmdPath = checkPath(cmdPath)
   let path2 = path.join(path.resolve('./'), cmdPath)
-  console.log(cmdArray)
+  console.log(path2, cmdArray)
   // 把子进程的输出重定向到一个文件中
   // let workerProcess = spawn(cmdStr, [], { cwd: path2, windowsHide: true, encoding: 'cp936',stdio: [ 'ignore', out, err ] })
   let workerProcess = spawn(cmdStr, cmdArray, { cwd: path2, windowsHide: true, encoding: 'cp936' })
 
   workerProcess.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`)
-    win.webContents.send('sendMsg','success', `${data}`, `${cmdStr}`);
+    mainWindow.webContents.send('sendMsg','success', `${data}`, `${cmdStr}`);
   })
   workerProcess.stderr.on('data', (data) => {
     // const data2 = Buffer.from(data).toString('utf8')
     // const blob = new Blob([data])
-    win.webContents.send('sendMsg', 'error', `${data}`, `${cmdStr}`);
+    mainWindow.webContents.send('sendMsg', 'error', `${data}`, `${cmdStr}`);
 
     // blob.text().then(console.log);
 
@@ -107,6 +106,9 @@ export const readJson = (path) => {
       // 处理数据
       jsonData.managerPort = await readYml()
       console.log(jsonData);
+      const {ueDefaultDir, evrDefaultDir} = getDefaultPath()
+      jsonData.ueDefaultDir = ueDefaultDir
+      jsonData.evrDefaultDir = evrDefaultDir
       // return jsonData
       resolve(jsonData)
     });
@@ -131,34 +133,14 @@ export const readYml = () => {
 // 弹出选择指定目录的框 并返回选择的目录
 export const openDialog = () => {
   return new Promise((resolve, reject) => {
-    const currentDir = app.getAppPath();
-    const currentDir1 = process.cwd()
-    const currentDir2 = __dirname
-
-    console.log('currentDir: ',currentDir)
-    console.log('process.cwd(): ',currentDir1)
-    console.log('__dirname: ',currentDir2)
     dialog.showOpenDialog({ 
       title: '请选择底座所在文件夹的Windows目录',
       properties: ['openDirectory']
-     }).then(result => {
+     }).then(async(result) => {
       // 1. 获取指定的绝对路径
       const selectedDir = result.filePaths[0];
-      console.log('selectedDir: ',selectedDir)
-      // 2. 计算相对路径
-      const relativePath = path.relative(currentDir1, selectedDir);
-      console.log('relativePath: ',relativePath)
-
-      // 3. 返回拼接后的路径
-      const fullPath = path.join(relativePath, 'MxWorld/Binaries/Win64');
-      console.log('fullPath: ',fullPath)
-
-      // 4. 通过fullPath寻找exe的文件名
-      getExeFile(fullPath).then(exeFile => {
-        // 5. 拼接路径
-        // const finalPath = path.join(fullPath, exeFile);
-        resolve({exeFile, fullPath})
-      })
+      const allPath = await getExePath(selectedDir)
+      resolve(allPath)
     }).catch(err => {
       console.log(err)
       reject(err)
@@ -196,7 +178,33 @@ export const writeJson = (finalJson,path) => {
     }
   })
 }
-const getExeFile = (folderPath) => {
+
+// 弹出选择指定目录的框 并返回选择的目录(返回的是相对路径)
+export const getDirectory = (name) => {
+  return new Promise((resolve, reject) => {
+    const currentDir1 = process.cwd()
+    console.log('当前目录: ',currentDir1)
+
+    dialog.showOpenDialog({ 
+      title: `请选择指定${name}目录`,
+      properties: ['openDirectory']
+     }).then(result => {
+      // 1. 获取指定的绝对路径
+      const selectedDir = result.filePaths[0];
+      console.log('selectedDir: ',selectedDir)
+      // 2. 计算相对路径
+      const relativePath = path.relative(currentDir1, selectedDir);
+      console.log('relativePath: ',relativePath)
+
+      resolve({selectedDir, relativePath})
+    }).catch(err => {
+      console.log(err)
+      reject(err)
+    })
+  })
+}
+
+export const getExeFile = (folderPath,suffix='.exe') => {
   // 读取当前目录下的所有exe文件
   return new Promise((resolve, reject) => {
     fs.readdir(folderPath, (err, files) => {
@@ -205,11 +213,15 @@ const getExeFile = (folderPath) => {
     
       // 过滤出所有以 .exe 结尾的文件名
       const exeFiles = files.filter(file => {
-        return path.extname(file) === '.exe'
+        return path.extname(file) === suffix
       });
-      // console.log(exeFiles[0])
+      console.log(files,exeFiles,'--------------')
       // return exeFiles[0]
-      resolve(exeFiles[0])
+      if (suffix === '.exe') {
+        resolve(exeFiles[0])
+      }else{
+        resolve(exeFiles)
+      }
       // // 如果找到唯一的 .exe 文件，则返回该文件名；否则返回空
       // if (exeFiles.length === 1) {
       //   console.log(`唯一的 .exe 文件为：${exeFiles[0]}`);
@@ -219,4 +231,61 @@ const getExeFile = (folderPath) => {
     });
     
   })
+}
+
+// 返回ue和evr的绝对路径
+const getDefaultPath = () => {
+  const currentDir = process.cwd()
+  // 获取上层目录名
+  const parentDirname = path.dirname(currentDir);
+  // ue路径默认值
+  let ueDefaultDir = path.join(parentDirname, 'Windows')
+  // evr文件路径默认值
+  let evrDefaultDir = path.join(parentDirname, 'Windows/MxWorld/Content/Maps')
+  return {ueDefaultDir, evrDefaultDir}
+}
+
+// 根据指定的ue路径，返回所有相关的地址
+export const getExePath = (selectedDir='') => {
+  return new Promise((resolve, reject) => {
+    if(selectedDir.length == 0){
+      selectedDir = getDefaultPath().ueDefaultDir
+    }
+    const currentDir = app.getAppPath();
+    const currentDir1 = process.cwd()
+    const currentDir2 = __dirname
+  
+    console.log('currentDir: ',currentDir)
+    console.log('process.cwd(): ',currentDir1)
+    console.log('__dirname: ',currentDir2)
+    // 1. 获取指定的绝对路径
+    // const selectedDir = result.filePaths[0];
+    console.log('selectedDir: ',selectedDir)
+    // 2. 计算相对路径
+    const relativePath = path.relative(currentDir1, selectedDir);
+    console.log('relativePath: ',relativePath)
+  
+    // 3. 返回拼接后的路径
+    const fullPath = path.join(relativePath, 'MxWorld/Binaries/Win64');
+    console.log('fullPath: ',fullPath)
+  
+    // 4. 通过fullPath寻找exe的文件名
+    getExeFile(fullPath).then(exeFile => {
+      // 5. 拼接路径
+      // const finalPath = path.join(fullPath, exeFile);
+      console.log({selectedDir,relativePath,exeFile, fullPath});
+      resolve({selectedDir,relativePath,exeFile, fullPath})
+    })
+    
+  })
+}
+
+const checkPath = (p) => {
+  if(path.isAbsolute(p)){
+    const currentDir1 = process.cwd()
+    const relativePath = path.relative(currentDir1, p);
+    // 转化相对路径
+    return relativePath
+  }
+  return p
 }

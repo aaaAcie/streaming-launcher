@@ -1,3 +1,12 @@
+/*
+ * @Author: 徐亦快 913587892@qq.com
+ * @Date: 2023-06-14 17:48:38
+ * @LastEditors: 徐亦快 913587892@qq.com
+ * @LastEditTime: 2023-06-15 14:29:32
+ * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\utils\core.js
+ * @Description: 
+ * 
+ */
 import { updatePushStreamServer } from "@/api/server";
 
 
@@ -45,8 +54,10 @@ export const getCofig = async (configType, path='') => {
   
   console.log(`----config ${configType}------`,response); // prints out 'pong'
   // 把MatchmakerAddress存在本地
-  window.localStorage.setItem('MatchmakerAddress',response.MatchmakerAddress)
-  window.localStorage.setItem('managerPort',response.managerPort)
+  if (configType==='CONFIG') {
+    window.localStorage.setItem('MatchmakerAddress',response.MatchmakerAddress)
+    window.localStorage.setItem('managerPort',response.managerPort)
+  }
 
   // return response
   return new Promise((resolve, reject) => {
@@ -69,6 +80,21 @@ export const writeJson = async (finalJson,path) => {
   // console.log(response); // prints out 'pong'
   return response
 };
+
+export const getExeFile = async (folderPath,suffix) => {
+  const response = await window.electron.getExeFile(folderPath,suffix);
+  return response
+};
+export const getDirectory = async (name) => {
+  const response = await window.electron.getDirectory(name);
+  return response
+};
+
+export const notifyIPC = async (command,clientId,data) => {
+  const response = await window.electron.notifyIPC(command,clientId,data);
+  return response
+};
+
 const updateData = async(streamData,tryTime=1,time=3000) => {
   if (tryTime > 5) {
     // 每隔5s尝试一次 尝试5次

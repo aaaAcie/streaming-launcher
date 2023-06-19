@@ -1,19 +1,19 @@
 import {watchEffect} from 'vue'
 
-export default (msg) => {
+export default (msg,cmdStr) => {
   let keyMsg = ref('')
   watchEffect(async cleanup => {
-    const key = ["Cirrus connected to Matchmaker","serverPublicIp", "WebSocket listening for Streamer connections"]
-    const rawMsg = msg.value
-    if (!rawMsg) {
+    const key = ["Cirrus connected to Matchmaker","serverPublicIp", "WebSocket listening for Streamer connections","Streamer connected:"]
+    if (!msg) {
       console.log('000000000000000000000');
       return
     }
+    // console.log(cmdStr,': ',msg)
     for (let index = 0; index < key.length; index++) {
       let k = key[index];
-      if (rawMsg.includes(k)) {
+      if (msg.includes(k)) {
         // console.log(msg)
-        keyMsg.value = rawMsg.replaceAll('\\x1B[1m\\x1B[32m','')
+        keyMsg.value = msg.replaceAll('\\x1B[1m\\x1B[32m','')
         break
       }
     }

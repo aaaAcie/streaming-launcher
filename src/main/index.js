@@ -2,15 +2,6 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 09:46:04
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-13 14:27:50
- * @FilePath: \mx\UE-launcher3\electron-app\src\main\index.js
- * @Description: 
- * 
- */
-/*
- * @Author: 徐亦快 913587892@qq.com
- * @Date: 2023-05-30 09:46:04
- * @LastEditors: 徐亦快 913587892@qq.com
  * @LastEditTime: 2023-06-08 12:24:24
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\index.js
  * @Description: 
@@ -37,32 +28,9 @@ function createWindow() {
     }
   })
   mainWindow.webContents.openDevTools();
-  handleData(workerProcessList,mainWindow)
-  // ipcMain.handle('addTab', (e,url,params) => {
-  //   let workerProcess = createTab(mainWindow, url)
-  //   workerProcessList.push(workerProcess)
-  //   return url
-  // })
-  // ipcMain.handle('openEXE', (e,cmdStr,cmdPath,cmdArray) => {
-  //   console.log(cmdArray)
 
-  //   let workerProcess = createEXE3(cmdStr,cmdPath,cmdArray)
-  //   workerProcessList.push(workerProcess)
-    
-  //   return {cmdStr, cmdPath, pid:workerProcess.pid}
-  // })
-  // ipcMain.handle('sendConfig', async(e,configType,path) => {
-  //   if (configType=='IP') {
-  //     const address = getIp()
-  //     return address
-  //   }else if (configType=='CONFIG') {
-  //     const config = await readJson(path)
-  //     return config
-  //   }else if (configType=='DIALOG') {
-  //     const fileObj = await openDialog()
-  //     return fileObj
-  //   }
-  // })
+  handleData(workerProcessList,mainWindow)
+
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 09:46:04
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-13 15:28:30
+ * @LastEditTime: 2023-06-16 17:46:58
  * @FilePath: \mx\UE-launcher3\electron-app\src\preload\index.js
  * @Description: 
  * 
@@ -25,6 +25,9 @@ if (process.contextIsolated) {
       sendConfig : (configType,path) => ipcRenderer.invoke('sendConfig',configType,path),
       killProcess: (pid) => ipcRenderer.invoke('killProcess',pid),
       writeJSON: (data,path) => ipcRenderer.invoke('writeJSON',data,path),
+      getDirectory: (name) => ipcRenderer.invoke('getDirectory',name),
+      getExeFile: (folderPath,suffix) => ipcRenderer.invoke('getDirectory',folderPath,suffix),
+      notifyIPC: (command,clientId,data) => ipcRenderer.invoke('notifyIPC',command,clientId,data),
     })
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
