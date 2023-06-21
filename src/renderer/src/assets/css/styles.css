@@ -104,18 +104,26 @@ a:hover {
   overflow: hidden;
 }
 .features article {
+  position: relative;
   background-color: rgba(194, 245, 255, 0.1);
   border-radius: 8px;
   box-sizing: border-box;
   padding: 12px;
   height: 100%;
 }
+.features article .btns {
+  position: absolute;
+  display: flex;
+  bottom: 20px;
+}
+.features article .btns button {
+  margin-right: 20px;
+}
 .features span {
   color: #d4e8ef;
   word-break: break-all;
 }
 .features .title {
-  cursor: pointer;
   font-size: 24px;
   text-align: center;
   font-weight: 500;

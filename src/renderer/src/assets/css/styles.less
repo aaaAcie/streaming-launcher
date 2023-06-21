@@ -129,6 +129,7 @@ a:hover {
   }
 
   article {
+    position: relative;
     background-color: rgba(194, 245, 255, 0.1);
     border-radius: 8px;
     box-sizing: border-box;
@@ -137,6 +138,14 @@ a:hover {
     // display: flex;
     // flex-direction: column;
     // justify-content: center;
+    .btns{
+      position: absolute;
+      display: flex;
+      bottom: 20px;
+      button {
+        margin-right: 20px;
+      }
+    }
   }
 
   span {
@@ -145,7 +154,6 @@ a:hover {
   }
 
   .title {
-    cursor: pointer;
     font-size: 24px;
     text-align: center;
     font-weight: 500;

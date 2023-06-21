@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-14 17:48:38
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-15 14:29:32
+ * @LastEditTime: 2023-06-21 09:19:51
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\utils\core.js
  * @Description: 
  * 
@@ -16,37 +16,42 @@ export const tabAdd = async (url, params = {}) => {
   console.log(response); // prints out 'pong'
 };
 // openEXE
-export const openEXE = async (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
-  let port, address
-  const response = await window.electron.openEXE(cmdStr, cmdPath, cmdArray);
-  console.log(response); // prints out 'pong'
-  const {pid} = response
-  if (cmdStr.startsWith('cirrus')) {
-    // port = cmdArray[1]
-    // address = cmdArray[7]
-    port = updateConfig['port']
-    address = updateConfig['address']
-    // 调用接口，更新cirrus的 [serverPid]
-    const data = await updateData({
-      address,
-      port,
-      serverPid: pid
-    })
-    console.log(data)
-  }else if(cmdStr.startsWith('MxWorld')){
-    port = updateConfig['port']
-    address = updateConfig['address']
-    // 调用接口，更新cirrus的 [clientPid] [clientPath]
-    const data = await updateData({
-      address,
-      port,
-      clientPid: pid,
-      clientPath: cmdPath
-    })
-    console.log(data)
-
-  }
-  return response
+export const openEXE = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
+  return new Promise(async(resolve, reject) => {
+    let port, address
+    const response = await window.electron.openEXE(cmdStr, cmdPath, cmdArray);
+    // console.log('exe打开消息：',response); // prints out 'pong'
+    const {pid} = response
+    if (cmdStr.startsWith('cirrus')) {
+      // port = cmdArray[1]
+      // address = cmdArray[7]
+      port = updateConfig['port']
+      address = updateConfig['address']
+      // 调用接口，更新cirrus的 [serverPid]
+      const data = await updateData({
+        address,
+        port,
+        serverPid: pid
+      })
+      console.log(data)
+    }else if(cmdStr.startsWith('MxWorld')){
+      port = updateConfig['port']
+      address = updateConfig['address']
+      // 调用接口，更新cirrus的 [clientPid] [clientPath]
+      const data = await updateData({
+        address,
+        port,
+        clientPid: pid,
+        clientPath: cmdPath
+      })
+      console.log(data)
+    }
+    if (pid) {
+      resolve(response)
+    }else{
+      reject(response)
+    }
+  })
 };
 
 export const getCofig = async (configType, path='') => {
@@ -95,7 +100,7 @@ export const notifyIPC = async (command,clientId,data) => {
   return response
 };
 
-const updateData = async(streamData,tryTime=1,time=3000) => {
+export const updateData = async(streamData,tryTime=1,time=3000) => {
   if (tryTime > 5) {
     // 每隔5s尝试一次 尝试5次
     console.log('与manager建立连接失败')

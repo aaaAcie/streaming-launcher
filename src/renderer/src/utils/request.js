@@ -9,9 +9,9 @@ const geturlLocal = () => {
   let url
   if (typeof localStorage.MatchmakerAddress !== 'undefined') {
     console.log('localStorage.MatchmakerAddress: ',localStorage.MatchmakerAddress,localStorage.managerPort);
-    url = 'http://' + localStorage.MatchmakerAddress + ':' + localStorage.managerPort
+    url = 'http://' + JSON.parse(localStorage.MatchmakerAddress) + ':' + JSON.parse(localStorage.managerPort)
   }else{
-    url = "http://192.168.2.128:83"
+    url = "http://localhost:83"
   }
   return url
 }

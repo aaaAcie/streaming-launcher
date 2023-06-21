@@ -2,29 +2,130 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-19 12:13:50
+ * @LastEditTime: 2023-06-21 14:53:35
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
 -->
+<template>
+  <Versions></Versions>
+  <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
+    {{ alertMsg.content }}
+  </n-alert>
+  <svg class="hero-logo" viewBox="0 0 900 300">
+    <use xlink:href="@/assets/icons.svg#electron" />
+  </svg>
+  <h2 class="hero-text">美象数字孪生平台</h2>
+  <p class="hero-tagline">
+    当前IP为
+    <code>{{ ip }}</code>
+    <!-- <span @click="router.push('/mangage')" style="cursor: pointer;padding-left: 20px; text-decoration: underline;">管理后台</span> -->
+    <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">点击复制推流接口</a>
+
+  </p>
+
+  <div class="features">
+    <div class="feature-item">
+      <article>
+        <h2 class="title">MXDATA</h2>
+        <div class="btns">
+          <n-button @click="handleJump('MXDATA')">启动</n-button>
+        </div>
+      </article>
+    </div>
+    <div class="feature-item">
+      <article>
+        <h2 class="title">EVR</h2>
+        <div class="btns">
+          <n-button @click="handleJump('EVR')">启动</n-button>
+          <n-button @click="setModal('EVR')">设置</n-button>
+        </div>
+        <!-- <p class="detail">
+          <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
+          <br/>
+          <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
+        </p> -->
+      </article>
+    </div>
+    <div class="feature-item">
+      <article style="position: relative;">
+        <h2 class="title">推流服务器</h2>
+        <div class="checkbox">
+          <n-checkbox v-model:checked="openUE" class="info" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">同步开启底座</n-checkbox>
+          <!-- <span @click="chooseFile('ue')" class="choose">选择目录</span> -->
+        </div>
+        <div class="btns">
+          <n-button @click="handleJump('推流服务器')">启动</n-button>
+          <n-button @click="setModal('ue')">设置</n-button>
+          <n-button @click="router.push('/mangage')">列表</n-button>
+        </div>
+        <!--<p class="detail">
+          <div v-for="(k, v) in defaultConfig" :key="k">
+            <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox>
+            <span style="color: #73a5b1;">{{ v }}:</span>
+            <input class="config-input" type="text" v-model="defaultConfig[v]" />
+          </div>
+        </p> -->
+      </article>
+    </div>
+  </div>
+   <EVRModal v-model:show="showModalEVR" :UEfile="UEfile" :defaultConfig="defaultConfig"></EVRModal>
+   <!-- <UEModal v-model:show="showModalUE" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value"></UEModal> -->
+   <UEModal v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
+    <template #checkbox>
+      <n-checkbox v-model:checked="openTurn" :style="checkboxStyle" style="padding-right: 2px;"></n-checkbox>
+    </template>
+   </UEModal>
+   <!--<settingModel v-model:show="showModalEVR" >
+    <template #content>
+      <div class="box">
+        <span style="width: 70px;">底座文件：</span>
+        <div class="des">{{defaultConfig.ueDefaultDir}}</div>
+        <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
+      </div>
+      <br />
+      <div class="box">
+        <span style="width: 70px;">场景文件：</span>
+        <div class="des">{{defaultConfig.evrDefaultDir}}</div>
+        <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
+      </div>
+    </template>
+  </settingModel> -->
+</template>
+
 <script setup>
 import Versions from "@/components/Versions.vue";
-import { NAlert, NCheckbox } from 'naive-ui'
+import { NAlert, NCheckbox,NButton } from 'naive-ui'
 import { ref, reactive } from "vue";
 import useMsgDealer from "@/hooks/useMsgDealer";
 import useFeebackDealer from "@/hooks/useFeebackDealer";
-import { tabAdd, openEXE, getCofig,writeJson,getDirectory,notifyIPC } from '@/utils/core.js'
+import { tabAdd, openEXE, getCofig,writeJson,getDirectory,notifyIPC,updateData } from '@/utils/core.js'
 import { useRouter } from 'vue-router'
+import EVRModal from "./components/EVRModal.vue";
+import UEModal from "./components/UEModal.vue";
+import { queryClientList } from "@/api/server";
+
+import settingModel from '@/components/settingModal.vue'
+
 const router = useRouter()
 const msg = ref("");
 const keyMsg = ref([]);
+
+const showModalEVR = ref(false)
+const showModalUE = ref(false)
+
 const openUE = ref(true)
 const openTurn = ref(false)
 // const serverPath = ".\\resources\\推流综合服务器"
 const serverPath = "..\\推流综合服务器"
 
 const serverJSONPath = serverPath + "\\config.json"
-
+const checkboxStyle = {
+    "--n-text-color": "#fff",
+    "--n-color": "2f3241",
+    // "--n-color": "#2f3241",
+    // "--n-border": "1px solid #c2f5ff",
+  }
 const UEfile = ref({
   exeFile: 'MxWorld.exe',
   fullPath: '.\\resources\\Windows', // 完整的相对路径
@@ -40,47 +141,75 @@ const alertMsg = ref({
 });
 const ip = ref('127.0.0.1')
 const defaultConfig = ref({})
-const portConfig = reactive({
-  HttpPort: '',
-  StreamerPort: '',
-  TurnPort: ''
-})
+
 const keyUrl = ref('')
-// const portConfig = useConfigDealer()
-let first = 0
 const clientId = ref(0)
 useFeebackDealer(keyMsg, alertMsg)
 
 // { type: 'openExe',  name: 'ue', clientId: '' }
 window.electron.ipcRenderer.on('receiveFromWeb', (event, data) => {
   if(data.name === 'evr') {
-    // openEXE("mxxx.exe", ".\\resources\\win-unpacked", []);
-    openEXE("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
+    // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
+    openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
   }else if(data.name === 'ue'){
     clientId.value = data.clientId
-    dealOpenServer()
+    // 若已有进行中的实例，直接通知前端连接
+    if(!dealOpenServer()){
+      // 提醒前端可以开始推流连接
+      notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
+    }
+    
   }
 });
-watchEffect(() => {
+watchEffect(async() => {
   let leng = keyMsg.value.length
-  if (leng>1 && keyMsg.value[leng-1].includes('Streamer connected:')) {
+  if(leng<1) {
+    return 
+  }
+  if (keyMsg.value[leng-1].includes('Streamer connected:')) {
     console.log(keyMsg.value[leng-1])
     console.log('---------------------------------------')
     // 提醒前端可以开始推流连接
-    notifyIPC('startStreaming',clientId.value,portConfig.HttpPort)
+    notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
+  } else if (keyMsg.value[leng-1].includes('PID:')) {
+    let str = keyMsg.value[leng-1]
+    let pidInfo = str.split('--')
+    console.log('----------- PID: -------------  ', pidInfo)
+    // 提醒前端可以开始推流连接
+    // notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
+    if (pidInfo[0].startsWith('cirrus')) {
+      const {data}  = await updateData({
+        address: defaultConfig.value.PublicIp,
+        port: defaultConfig.value.HttpPort,
+        clientPid: pidInfo[1],
+      })
+      console.log(data)
+    }else if(pidInfo[0].startsWith('turnserver')){
+      const {data}  = await updateData({
+        address: defaultConfig.value.PublicIp,
+        port: defaultConfig.value.HttpPort,
+        turnPid: pidInfo[1]
+      })
+      console.log(data)
+    }
   }
 })
 const initConfig = () => {
-  getCofig('IP').then(d => ip.value = d)
+  // getCofig('IP').then(d => ip.value = d)
+  console.log('init----------------->')
   getCofig('CONFIG', serverJSONPath).then(d => {
-  // getCofig('CONFIG', '..\\推流综合服务器\\config.json').then(d => {
+    ip.value = d.LocalIP
+    // 启动manager
+    // openEXE2("manager.exe", d.managerDefaultDir);
+
     // 这里还有ueDefaultDir, evrDefaultDir的数据 可以用来回显
     defaultConfig.value = d
-    portConfig.HttpPort = d.HttpPort
-    portConfig.StreamerPort = d.StreamerPort
-    portConfig.TurnPort = d.TurnPort
-  
+    // defaultConfig.MatchmakerAddress = ip.value
+    console.log("defaultConfig: ",defaultConfig.value)
     keyUrl.value = 'http://' + d.MatchmakerAddress + ':' + d.managerPort
+    window.localStorage.setItem('MatchmakerAddress',JSON.stringify(d.MatchmakerAddress))
+    window.localStorage.setItem('managerPort',JSON.stringify(d.managerPort))
+    
     getCofig('SecenePath', defaultConfig.value.evrDefaultDir).then(fileData => {
       console.log(fileData,'发送成功')
     })
@@ -92,6 +221,8 @@ const initConfig = () => {
     UEfile.value = fileData
     console.log(UEfile.value)
   })
+
+
 }
 initConfig()
 watchEffect(() => {
@@ -110,14 +241,14 @@ const handleJump = async(data) => {
   } else if (data === "EVR") {
     console.log("EVR", defaultConfig.evrDefaultDir);
     // 开发
-    // openEXE("mxxx.exe", ".\\resources\\win-unpacked", []);
+    // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
     // 生产
-    // openEXE('StartMxdata.bat', '..\\Windows')
-    // openEXE("LauncherMxData.exe", "..\\Windows", []);
-    openEXE("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
-    // openEXE("LauncherEVR.exe", "..\\Windows",cmdArray);
+    // openEXE2('StartMxdata.bat', '..\\Windows')
+    // openEXE2("LauncherMxData.exe", "..\\Windows", []);
+    openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
+    // openEXE2("LauncherEVR.exe", "..\\Windows",cmdArray);
   } else {
-    console.log('shoudaoxiaoxi')
+    console.log('defaultConfig: ',defaultConfig.value)
     dealOpenServer()
   }
 };
@@ -128,12 +259,14 @@ const chooseFile = (name) => {
     // 选择ue的windows文件夹 将会自动寻找到/MxWorld/Binaries/Win64里的exe文件，才能做到关闭启动器，把ue一起关闭。
     getCofig('DIALOG').then(fileData => {
       UEfile.value = fileData
+      defaultConfig.ueDefaultDir = fileData.selectedDir
       console.log(UEfile.value)
     })
   }else if(name==='scene'){
     getDirectory(name).then(fileData => {
       // 存在本地
       window.localStorage.setItem('ueScene',JSON.stringify(fileData))
+      defaultConfig.evrDefaultDir = fileData.selectedDir
       getCofig('SecenePath',fileData.selectedDir).then(fileData => {
         console.log(fileData,'发送成功')
       })
@@ -167,90 +300,96 @@ const copyToClipboard = () => {
       }
     });
 }
+const getClients = async () => {
+  const { data } = await queryClientList();
+  if (data.code === 1001) {
+    let nmberOfCirrusServers = data.value.cirrusServersArray.length
+    return nmberOfCirrusServers;
+  }
+};
 const dealOpenServer = async() => {
-  defaultConfig.value['SFUPort'] = portConfig.StreamerPort - '10'
-  defaultConfig.value['PublicIp'] = ip.value
+
+  defaultConfig.value['SFUPort'] = defaultConfig.value.StreamerPort - '10'
+  console.log('defaultConfig: ',defaultConfig.value)
+
   // 覆盖json文件
-  let finalJson = { ...defaultConfig.value, ...portConfig}
-  console.log(finalJson)
+  // let finalJson = { ...defaultConfig.value, ...portConfig}
+  let finalJson = defaultConfig.value
+  console.log('finalJson: ',finalJson)
+
   let res = await writeJson(finalJson, serverJSONPath)
   console.log(res)
 
   let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
-  cmdArray2[2] = '-PixelStreamingPort=' + portConfig.StreamerPort
+  cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
+  console.log('openTurn: ',openTurn.value)
+
+  // 若当前有推流服务器开启 return
+  let nb = await getClients()
+  console.log('nmberOfCirrusServers:',nb)
+  if( nb > 0){
+    alertMsg.value = {
+      done: true,
+      type: 'fail',
+      title: '开启失败',
+      content: `试用版仅支持一路并发，请关闭已有连接后再次启动`,
+      reason: ''
+    }
+    return false
+  }
 
   if (openTurn.value) {
     // test.ps1 会去打开cirrus3
-    openEXE("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test.ps1'], {port:portConfig.HttpPort, address:ip.value});
+    openEXE2("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test3.ps1'], {port:defaultConfig.value.HttpPort, address:ip.value});
   }else{
     // 直接进入这里
-    openEXE("cirrus3.3.exe", serverPath, [], {port:portConfig.HttpPort, address:ip.value});
+    openEXE2("cirrus3.3.exe", serverPath, [], {port:defaultConfig.value.HttpPort, address:ip.value});
   }
 
   if (openUE.value) {
-    // openEXE("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
+    // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
     console.log('打开ue----------',UEfile.value);
-    openEXE(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:portConfig.HttpPort, address:ip.value});
+    openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:defaultConfig.value.HttpPort, address:ip.value});
+  }
+  return true
+}
+
+const setModal = (type='EVR') => {
+  if (type ==='EVR') {
+    showModalEVR.value = true
+  } else {
+    showModalUE.value = true
   }
 }
+const setShowValue = () => {
+  showModalUE.value = false
+}
+const openEXE2 = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
+
+  openEXE(cmdStr, cmdPath, cmdArray, updateConfig).then(
+    (res) => {
+      console.log('exe打开消息：',res); // prints out 'pong'
+
+      alertMsg.value = {
+        done: true,
+        type: 'success',
+        title: '打开成功',
+        content: `${cmdStr}打开成功 ${JSON.stringify(res)}`,
+        reason: '',
+      }
+    }
+  ).catch((err) => {
+    console.log('exe打开fail消息：',err); // prints out 'pong'
+    alertMsg.value = {
+      done: true,
+      type: 'fail',
+      title: '打开失败',
+      content: `${cmdStr}打开失败 ${JSON.stringify(err)}`,
+      reason: '',
+    }
+  })
+}
 </script>
-
-<template>
-  <Versions></Versions>
-  <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
-    {{ alertMsg.content }}
-  </n-alert>
-  <svg class="hero-logo" viewBox="0 0 900 300">
-    <use xlink:href="@/assets/icons.svg#electron" />
-  </svg>
-  <h2 class="hero-text">美象数字孪生平台</h2>
-  <p class="hero-tagline">
-    当前IP为
-    <code>{{ ip }}</code>
-    <span @click="router.push('/mangage')" style="cursor: pointer;padding-left: 20px; text-decoration: underline;">管理后台</span>
-    <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">点击复制推流接口</a>
-
-  </p>
-
-
-  <div class="features">
-    <div class="feature-item">
-      <article>
-        <h2 class="title" @click="handleJump('MXDATA')">MXDATA</h2>
-      </article>
-    </div>
-    <div class="feature-item">
-      <article>
-        <h2 class="title" @click="handleJump('EVR')">EVR</h2>
-        <p class="detail">
-          <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
-          <br/>
-          <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
-        </p>
-      </article>
-    </div>
-    <div class="feature-item">
-      <article style="position: relative;">
-        <h2 class="title" @click="handleJump('推流服务器')">推流服务器</h2>
-        <div class="checkbox">
-          <n-checkbox v-model:checked="openUE" class="info" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">并开启底座</n-checkbox>
-          <span @click="chooseFile('ue')" class="choose">选择目录</span>
-        </div>
-
-        <!-- <p class="detail" v-show="alertMsg['exe'].startsWith('cirrus')">
-          <div v-for="(m, index) in keyMsg.slice(-2)" :key="index">{{ m }}</div>
-        </p> -->
-        <p class="detail">
-          <div v-for="(k, v) in portConfig" :key="k">
-            <!-- <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox> -->
-            <span style="color: #73a5b1;">{{ v }}:</span>
-            <input type="text" v-model="portConfig[v]" />
-          </div>
-        </p>
-      </article>
-    </div>
-  </div>
-</template>
 
 <style lang="less">
 @import "@/assets/css/styles.less";
@@ -262,7 +401,7 @@ const dealOpenServer = async() => {
   width: 92%;
 }
 
-input {
+.config-input {
   margin-left: 5px;
   // width: auto;
   max-width: 48px;
@@ -274,7 +413,6 @@ input {
   height: 80%;
   background-color: #2f3241;
   color: #c2f5ff;
-
 }
 
 .checkbox {
@@ -287,5 +425,20 @@ input {
   text-decoration: underline;
   cursor: pointer;
 }
+.box{
+  display: flex;
+  .des{
+    flex: 1;
+    height: 100px;
+    border: 1px #2f3241 solid;
+    padding: 5px;
+    margin-right: 10px;
+    background-color: #2f3241;
+    color: #a6f5ff;
 
+  }
+  .choose {
+    color: #d4e8ef;
+  }
+}
 </style>

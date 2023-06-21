@@ -3,7 +3,7 @@ import {watchEffect} from 'vue'
 export default (msg,cmdStr) => {
   let keyMsg = ref('')
   watchEffect(async cleanup => {
-    const key = ["Cirrus connected to Matchmaker","serverPublicIp", "WebSocket listening for Streamer connections","Streamer connected:"]
+    const key = ["Cirrus connected to Matchmaker","serverPublicIp", "WebSocket listening for Streamer connections","Streamer connected:","PID:"]
     if (!msg) {
       console.log('000000000000000000000');
       return

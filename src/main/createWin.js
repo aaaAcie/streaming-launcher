@@ -106,9 +106,12 @@ export const readJson = (path) => {
       // 处理数据
       jsonData.managerPort = await readYml()
       console.log(jsonData);
-      const {ueDefaultDir, evrDefaultDir} = getDefaultPath()
+      const {ueDefaultDir, evrDefaultDir,managerDefaultDir} = getDefaultPath()
       jsonData.ueDefaultDir = ueDefaultDir
       jsonData.evrDefaultDir = evrDefaultDir
+      jsonData.managerDefaultDir = managerDefaultDir
+      jsonData.LocalIP = getIp()
+      jsonData.PublicIp = getIp()
       // return jsonData
       resolve(jsonData)
     });
@@ -242,7 +245,9 @@ const getDefaultPath = () => {
   let ueDefaultDir = path.join(parentDirname, 'Windows')
   // evr文件路径默认值
   let evrDefaultDir = path.join(parentDirname, 'Windows/MxWorld/Content/Maps')
-  return {ueDefaultDir, evrDefaultDir}
+  // manager路径默认值
+  let managerDefaultDir = path.join(parentDirname, 'manager')
+  return {ueDefaultDir, evrDefaultDir,managerDefaultDir}
 }
 
 // 根据指定的ue路径，返回所有相关的地址
@@ -281,6 +286,8 @@ export const getExePath = (selectedDir='') => {
 }
 
 const checkPath = (p) => {
+  console.log('p: ',p,path.isAbsolute(p))
+
   if(path.isAbsolute(p)){
     const currentDir1 = process.cwd()
     const relativePath = path.relative(currentDir1, p);

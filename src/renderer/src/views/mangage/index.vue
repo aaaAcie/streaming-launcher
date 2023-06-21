@@ -1,3 +1,59 @@
+<template>
+  <div class="topbox">
+    <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
+      {{ alertMsg.content }}
+    </n-alert>
+    <div @click="router.push('/')" class="back">返回 /</div>
+  </div>
+  <div style="width: 100%;position: relative;top:50px;">
+    <div class="cards-box">
+      <n-card
+        closable
+        v-for="(client, index) in clients"
+        :key="index"
+        :title="`${client.address}:${client.port}`"
+        style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
+        @close="handleClose(client)"
+      >
+        <template #cover>
+          <img src="@/assets/img/bg.png" />
+        </template>
+        <div>
+          <span :style="{backgroundColor: client.streamConnected ? '#18a058' : '#c2f5ff'}" class="ball"></span>
+          连接数：{{ client.numConnectedClients }}个
+          <span @click="(showModal = true), (curtClient = client)" class="link-detail">
+            查看连接详情
+          </span>
+        </div>
+      </n-card>
+    </div>
+    <n-modal
+      v-model:show="showModal"
+      class="custom-card"
+      preset="card"
+      :style="bodyStyle"
+      title="连接详情"
+      size="huge"
+      :bordered="false"
+    >
+      <div class="playerbox" style="background-color: #5e5e63">
+        <span>用户ID</span>
+        <span style="flex: 1">来源</span>
+        <span>操作</span>
+      </div>
+      <div
+        v-for="(player, index) in curtClient.playerList"
+        :key="index"
+        class="playerbox"
+      >
+        <span>{{ player.playerId }}</span>
+        <span style="flex: 1">{{ player.playerSocket }}</span>
+        <span class="kick" @click="kick(player.playerId)">踢出</span>
+      </div>
+    </n-modal>
+  </div>
+</template>
+
 <script setup>
 import { NCard, NModal, NAlert, NDataTable } from "naive-ui";
 import { useRouter } from "vue-router";
@@ -109,61 +165,6 @@ onUnmounted(() => {
 })
 </script>
 
-<template>
-  <div class="topbox">
-    <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
-      {{ alertMsg.content }}
-    </n-alert>
-    <div @click="router.push('/')" class="back">返回 /</div>
-  </div>
-  <div style="width: 100%;position: relative;top:50px;">
-    <div class="cards-box">
-      <n-card
-        closable
-        v-for="(client, index) in clients"
-        :key="index"
-        :title="`${client.address}:${client.port}`"
-        style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
-        @close="handleClose(client)"
-      >
-        <template #cover>
-          <img src="@/assets/img/bg.png" />
-        </template>
-        <div>
-          连接数：{{ client.numConnectedClients }}个
-          <span @click="(showModal = true), (curtClient = client)" class="link-detail">
-            查看连接详情
-          </span>
-        </div>
-      </n-card>
-    </div>
-    <n-modal
-      v-model:show="showModal"
-      class="custom-card"
-      preset="card"
-      :style="bodyStyle"
-      title="连接详情"
-      size="huge"
-      :bordered="false"
-    >
-      <div class="playerbox" style="background-color: #5e5e63">
-        <span>用户ID</span>
-        <span style="flex: 1">来源</span>
-        <span>操作</span>
-      </div>
-      <div
-        v-for="(player, index) in curtClient.playerList"
-        :key="index"
-        class="playerbox"
-      >
-        <span>{{ player.playerId }}</span>
-        <span style="flex: 1">{{ player.playerSocket }}</span>
-        <span class="kick" @click="kick(player.playerId)">踢出</span>
-      </div>
-    </n-modal>
-  </div>
-</template>
-
 <style lang="less" scoped>
 .topbox{
   position: fixed;
@@ -206,7 +207,16 @@ onUnmounted(() => {
     height: 4px;
   }
 }
-
+.ball{
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  position: relative;
+  top: 3px;
+  // background-color: red;
+  border-radius: 50%; /* 将矩形边框半径设置为50%，从而变成圆形 */
+  // border: 1px #c2f5ff solid;
+}
 .n-card {
   background: #1f2027;
   color: #f4f4f4;
