@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-27 09:16:15
+ * @LastEditTime: 2023-06-27 10:52:50
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -165,7 +165,8 @@ const dealWS = (data) => {
   console.log(data)
   if(data.name === 'evr') {
     // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
-    openEXE2("LauncherEVR.exe", defaultConfig.value.evrDefaultDir || "..\\Windows", []);
+    // openEXE2("LauncherEVR.exe", defaultConfig.value.ueDefaultDir || "..\\Windows", []);
+    openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, ['-EVR']);
   }else if(data.name === 'ue'){
     console.log('--------------执行dealOpenServer：',data)
     clientId.value = data.clientId
@@ -271,13 +272,8 @@ const handleJump = async(data) => {
 
   } else if (data === "EVR") {
     console.log("EVR", defaultConfig.evrDefaultDir);
-    // 开发
-    // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
-    // 生产
-    // openEXE2('StartMxdata.bat', '..\\Windows')
-    // openEXE2("LauncherMxData.exe", "..\\Windows", []);
-    openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
-    // openEXE2("LauncherEVR.exe", "..\\Windows",cmdArray);
+    openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, ['-EVR']);
+    // openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
   } else {
     console.log('defaultConfig: ',defaultConfig.value)
     dealOpenServer()
