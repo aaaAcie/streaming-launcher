@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 09:46:04
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-08 12:24:24
+ * @LastEditTime: 2023-06-21 17:58:14
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\index.js
  * @Description: 
  * 
@@ -11,7 +11,7 @@ import { app, shell, BrowserWindow,ipcMain,session  } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import {createTab,createEXE3,getIp,readJson,openDialog,killProcess} from './createWin'
+import { killProcess } from './createWin'
 import { handleData } from './handleData'
 var workerProcessList = []
 function createWindow() {
@@ -99,10 +99,14 @@ app.on('window-all-closed', () => {
 app.on('before-quit', () => {
   try {
     for (let i = 0; i < workerProcessList.length; i++) {
-      // console.log(workerProcessList[i]);
-      // console.log('pid ',workerProcessList[i].pid);
-
-      workerProcessList[i].kill()
+      // console.log('-------killing----- ', workerProcessList[i])
+      console.log('-------killing----- ', workerProcessList[i]?.pid)
+      if (workerProcessList[i]?.cmdStr) {
+        // process.kill(workerProcessList[i].pid);
+        killProcess(workerProcessList[i].pid)
+      }else{
+        workerProcessList[i].kill()
+      }
       // process.kill(workerProcessList[i].pid);
     }
   } catch (error) {

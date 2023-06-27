@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "美象数字孪生平台启动器",
   "main": "./out/main/index.js",
-  "author": "example.com",
+  "author": "Acie",
   "homepage": "https://www.meixxx.com",
   "scripts": {
     "format": "prettier --write .",

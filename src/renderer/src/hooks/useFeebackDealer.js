@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-07 16:10:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 09:47:09
+ * @LastEditTime: 2023-06-21 17:26:39
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\hooks\useFeebackDealer.js
  * @Description: 
  * 
@@ -14,7 +14,6 @@ import useMsgDealer from './useMsgDealer'
 export default (keyMsg,alertMsg) => {
   let first = 0
   window.electron.ipcRenderer.on('sendMsg', (event, type, message, cmdStr) => {
-    console.log('type',type)
     if (type.startsWith('success')) {
       // ++first
       // if (first < 2) {
@@ -30,7 +29,7 @@ export default (keyMsg,alertMsg) => {
       let str = useMsgDealer(message,cmdStr).trim()
       if (str.length > 0) {
         keyMsg.value.push(str)
-        console.log('=======', keyMsg.value)
+        console.log(cmdStr,'=======', str)
       }
     } else {
       // alertMsg.value = {
@@ -41,7 +40,7 @@ export default (keyMsg,alertMsg) => {
       //   reason: '',
       //   exe: cmdStr
       // }
-      console.log('error', message)
+      console.log('error',cmdStr, message)
     }
   });
   watchEffect(async cleanup => {

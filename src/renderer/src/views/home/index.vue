@@ -2,16 +2,24 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 14:53:35
+ * @LastEditTime: 2023-06-27 09:16:15
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
 -->
 <template>
   <Versions></Versions>
-  <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
+  <n-alert
+    v-if="alertMsg.done"
+    :title="alertMsg.title"
+    :type="alertMsg.type"
+    closable
+    style="--n-color: rgba(237, 247, 242, 1)"
+  >
     {{ alertMsg.content }}
   </n-alert>
+  <!-- <router-view></router-view> -->
+  <mangage v-model:show="showModalMangage" v-model:alertMsg="alertMsg" :isShow="showModalMangage"></mangage>
   <svg class="hero-logo" viewBox="0 0 900 300">
     <use xlink:href="@/assets/icons.svg#electron" />
   </svg>
@@ -20,7 +28,7 @@
     当前IP为
     <code>{{ ip }}</code>
     <!-- <span @click="router.push('/mangage')" style="cursor: pointer;padding-left: 20px; text-decoration: underline;">管理后台</span> -->
-    <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">点击复制推流接口</a>
+    <!-- <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">点击复制推流接口</a> -->
 
   </p>
 
@@ -57,7 +65,10 @@
         <div class="btns">
           <n-button @click="handleJump('推流服务器')">启动</n-button>
           <n-button @click="setModal('ue')">设置</n-button>
-          <n-button @click="router.push('/mangage')">列表</n-button>
+          <!-- <n-button @click="router.push({name: 'mangage'})">列表</n-button> -->
+          
+          <n-button @click="showModalMangage = true">列表</n-button>
+
         </div>
         <!--<p class="detail">
           <div v-for="(k, v) in defaultConfig" :key="k">
@@ -69,28 +80,30 @@
       </article>
     </div>
   </div>
-   <EVRModal v-model:show="showModalEVR" :UEfile="UEfile" :defaultConfig="defaultConfig"></EVRModal>
-   <!-- <UEModal v-model:show="showModalUE" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value"></UEModal> -->
-   <UEModal v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
+  <div>
+    <EVRModal v-model:show="showModalEVR" :UEfile="UEfile" :defaultConfig="defaultConfig"></EVRModal>
+    <!-- <UEModal v-model:show="showModalUE" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value"></UEModal> -->
+    <UEModal v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
     <template #checkbox>
       <n-checkbox v-model:checked="openTurn" :style="checkboxStyle" style="padding-right: 2px;"></n-checkbox>
     </template>
-   </UEModal>
-   <!--<settingModel v-model:show="showModalEVR" >
-    <template #content>
-      <div class="box">
-        <span style="width: 70px;">底座文件：</span>
-        <div class="des">{{defaultConfig.ueDefaultDir}}</div>
-        <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
-      </div>
-      <br />
-      <div class="box">
-        <span style="width: 70px;">场景文件：</span>
-        <div class="des">{{defaultConfig.evrDefaultDir}}</div>
-        <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
-      </div>
-    </template>
-  </settingModel> -->
+    </UEModal>
+    <!--<settingModel v-model:show="showModalEVR" >
+      <template #content>
+        <div class="box">
+          <span style="width: 70px;">底座文件：</span>
+          <div class="des">{{defaultConfig.ueDefaultDir}}</div>
+          <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
+        </div>
+        <br />
+        <div class="box">
+          <span style="width: 70px;">场景文件：</span>
+          <div class="des">{{defaultConfig.evrDefaultDir}}</div>
+          <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
+        </div>
+      </template>
+    </settingModel> -->
+  </div>
 </template>
 
 <script setup>
@@ -99,21 +112,23 @@ import { NAlert, NCheckbox,NButton } from 'naive-ui'
 import { ref, reactive } from "vue";
 import useMsgDealer from "@/hooks/useMsgDealer";
 import useFeebackDealer from "@/hooks/useFeebackDealer";
-import { tabAdd, openEXE, getCofig,writeJson,getDirectory,notifyIPC,updateData } from '@/utils/core.js'
+import { tabAdd, addPid, openEXE, getCofig,writeJson,getDirectory,notifyIPC,updateData } from '@/utils/core.js'
 import { useRouter } from 'vue-router'
 import EVRModal from "./components/EVRModal.vue";
 import UEModal from "./components/UEModal.vue";
-import { queryClientList } from "@/api/server";
+import mangage from "../mangage/index.vue";
 
+import { queryClientList } from "@/api/server";
+import {debounce,getRightUrlFromWeb} from "@/utils/fns.js";
 import settingModel from '@/components/settingModal.vue'
 
-const router = useRouter()
+// const router = useRouter()
 const msg = ref("");
 const keyMsg = ref([]);
 
 const showModalEVR = ref(false)
 const showModalUE = ref(false)
-
+const showModalMangage = ref(false)
 const openUE = ref(true)
 const openTurn = ref(false)
 // const serverPath = ".\\resources\\推流综合服务器"
@@ -146,21 +161,35 @@ const keyUrl = ref('')
 const clientId = ref(0)
 useFeebackDealer(keyMsg, alertMsg)
 
-// { type: 'openExe',  name: 'ue', clientId: '' }
-window.electron.ipcRenderer.on('receiveFromWeb', (event, data) => {
+const dealWS = (data) => {
+  console.log(data)
   if(data.name === 'evr') {
     // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
-    openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
+    openEXE2("LauncherEVR.exe", defaultConfig.value.evrDefaultDir || "..\\Windows", []);
   }else if(data.name === 'ue'){
+    console.log('--------------执行dealOpenServer：',data)
     clientId.value = data.clientId
+    // return
     // 若已有进行中的实例，直接通知前端连接
     if(!dealOpenServer()){
       // 提醒前端可以开始推流连接
       notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
     }
-    
   }
+}
+// 这里做个防抖
+const useDebounce = debounce((data) => dealWS(data), 6000, true)
+// const useDebounce = debounce((data) => console.log('88888888888888888'), 6000, true)
+
+// { type: 'openExe',  name: 'ue', clientId: '' }
+window.electron.ipcRenderer.on('receiveFromWeb', (event, data) => {
+  console.log('-----receiveFromWeb-------',event)
+
+  useDebounce(data)
+  // dealWS(data)
 });
+
+
 watchEffect(async() => {
   let leng = keyMsg.value.length
   if(leng<1) {
@@ -174,21 +203,26 @@ watchEffect(async() => {
   } else if (keyMsg.value[leng-1].includes('PID:')) {
     let str = keyMsg.value[leng-1]
     let pidInfo = str.split('--')
+    let pid = pidInfo[1].split(" ")[1]
     console.log('----------- PID: -------------  ', pidInfo)
     // 提醒前端可以开始推流连接
     // notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
     if (pidInfo[0].startsWith('cirrus')) {
-      const {data}  = await updateData({
+      // 让主线程知道这个pid app关闭的时候kill掉
+      addPid('cirrus', pid)
+      const data  = await updateData({
         address: defaultConfig.value.PublicIp,
         port: defaultConfig.value.HttpPort,
-        clientPid: pidInfo[1],
+        serverPid: pid,
       })
       console.log(data)
     }else if(pidInfo[0].startsWith('turnserver')){
-      const {data}  = await updateData({
+      // 让主线程知道这个pid app关闭的时候kill掉
+      addPid('turnserver', pid)
+      const data  = await updateData({
         address: defaultConfig.value.PublicIp,
         port: defaultConfig.value.HttpPort,
-        turnPid: pidInfo[1]
+        turnPid: pid
       })
       console.log(data)
     }
@@ -199,16 +233,13 @@ const initConfig = () => {
   console.log('init----------------->')
   getCofig('CONFIG', serverJSONPath).then(d => {
     ip.value = d.LocalIP
-    // 启动manager
-    // openEXE2("manager.exe", d.managerDefaultDir);
 
     // 这里还有ueDefaultDir, evrDefaultDir的数据 可以用来回显
     defaultConfig.value = d
-    // defaultConfig.MatchmakerAddress = ip.value
+    // defaultConfig.value.MatchmakerAddress = "192.168.2.128"
     console.log("defaultConfig: ",defaultConfig.value)
     keyUrl.value = 'http://' + d.MatchmakerAddress + ':' + d.managerPort
-    window.localStorage.setItem('MatchmakerAddress',JSON.stringify(d.MatchmakerAddress))
-    window.localStorage.setItem('managerPort',JSON.stringify(d.managerPort))
+    getRightUrlFromWeb.fullUrl = [d.MatchmakerAddress, d.managerPort]
     
     getCofig('SecenePath', defaultConfig.value.evrDefaultDir).then(fileData => {
       console.log(fileData,'发送成功')
@@ -293,7 +324,7 @@ const copyToClipboard = () => {
       console.error('复制失败', err)
       alertMsg.value = {
         done: true,
-        type: 'fail',
+        type: 'warning',
         title: '复制失败',
         content: `请到控制台查看推流接口，并使用 GET 方法使用该接口获取当前可用的推流地址`,
         reason: ''
@@ -310,7 +341,7 @@ const getClients = async () => {
 const dealOpenServer = async() => {
 
   defaultConfig.value['SFUPort'] = defaultConfig.value.StreamerPort - '10'
-  console.log('defaultConfig: ',defaultConfig.value)
+  // console.log('defaultConfig: ',defaultConfig.value)
 
   // 覆盖json文件
   // let finalJson = { ...defaultConfig.value, ...portConfig}
@@ -320,9 +351,8 @@ const dealOpenServer = async() => {
   let res = await writeJson(finalJson, serverJSONPath)
   console.log(res)
 
-  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
-  cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
-  console.log('openTurn: ',openTurn.value)
+
+  console.log('openTurn,openUE : ',openTurn.value,openUE.value)
 
   // 若当前有推流服务器开启 return
   let nb = await getClients()
@@ -330,28 +360,42 @@ const dealOpenServer = async() => {
   if( nb > 0){
     alertMsg.value = {
       done: true,
-      type: 'fail',
+      type: 'warning',
       title: '开启失败',
       content: `试用版仅支持一路并发，请关闭已有连接后再次启动`,
       reason: ''
     }
+
     return false
   }
 
   if (openTurn.value) {
     // test.ps1 会去打开cirrus3
-    openEXE2("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test3.ps1'], {port:defaultConfig.value.HttpPort, address:ip.value});
+    openEXE2("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test6.ps1'], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
+      ({pid}) => {
+        dealOpenUE(pid)
+      }
+    );
   }else{
     // 直接进入这里
-    openEXE2("cirrus3.3.exe", serverPath, [], {port:defaultConfig.value.HttpPort, address:ip.value});
+    openEXE2("cirrus3.3.exe", serverPath, [], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
+      ({pid}) => {
+        dealOpenUE(pid)
+      }
+    )
   }
 
+
+  return true
+}
+const dealOpenUE = (pid) => {
+  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
+  cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
   if (openUE.value) {
     // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
-    console.log('打开ue----------',UEfile.value);
+    console.log('打开ue----------',UEfile.value,' cirrus已开在：',pid);
     openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:defaultConfig.value.HttpPort, address:ip.value});
   }
-  return true
 }
 
 const setModal = (type='EVR') => {
@@ -366,7 +410,7 @@ const setShowValue = () => {
 }
 const openEXE2 = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
 
-  openEXE(cmdStr, cmdPath, cmdArray, updateConfig).then(
+  return openEXE(cmdStr, cmdPath, cmdArray, updateConfig).then(
     (res) => {
       console.log('exe打开消息：',res); // prints out 'pong'
 
@@ -377,12 +421,14 @@ const openEXE2 = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
         content: `${cmdStr}打开成功 ${JSON.stringify(res)}`,
         reason: '',
       }
+      return res
     }
+    
   ).catch((err) => {
-    console.log('exe打开fail消息：',err); // prints out 'pong'
+    console.log('exe打开warning消息：',err); // prints out 'pong'
     alertMsg.value = {
       done: true,
-      type: 'fail',
+      type: 'warning',
       title: '打开失败',
       content: `${cmdStr}打开失败 ${JSON.stringify(err)}`,
       reason: '',
@@ -399,6 +445,7 @@ const openEXE2 = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
 .n-alert {
   position: absolute;
   width: 92%;
+  z-index: 9999999999;
 }
 
 .config-input {

@@ -55,7 +55,7 @@ export function createEXE2(cmdStr, cmdPath) {
 export function createEXE3(cmdStr, cmdPath, cmdArray,mainWindow) {
   cmdPath = checkPath(cmdPath)
   let path2 = path.join(path.resolve('./'), cmdPath)
-  console.log(path2, cmdArray)
+  console.log(path2, cmdArray, Date.now())
   // 把子进程的输出重定向到一个文件中
   // let workerProcess = spawn(cmdStr, [], { cwd: path2, windowsHide: true, encoding: 'cp936',stdio: [ 'ignore', out, err ] })
   let workerProcess = spawn(cmdStr, cmdArray, { cwd: path2, windowsHide: true, encoding: 'cp936' })
@@ -63,6 +63,7 @@ export function createEXE3(cmdStr, cmdPath, cmdArray,mainWindow) {
   workerProcess.stdout.on('data', (data) => {
     console.log(`stdout: ${data}`)
     mainWindow.webContents.send('sendMsg','success', `${data}`, `${cmdStr}`);
+    
   })
   workerProcess.stderr.on('data', (data) => {
     // const data2 = Buffer.from(data).toString('utf8')
@@ -99,10 +100,10 @@ export const readJson = (path) => {
     // 读取本地 JSON 文件
     fs.readFile(path, async(err, data) => {
       if (err) throw err;
-  
       // 解析 JSON 数据
       const jsonData = JSON.parse(data);
-  
+      const localIP = getIp()
+      
       // 处理数据
       jsonData.managerPort = await readYml()
       console.log(jsonData);
@@ -110,8 +111,9 @@ export const readJson = (path) => {
       jsonData.ueDefaultDir = ueDefaultDir
       jsonData.evrDefaultDir = evrDefaultDir
       jsonData.managerDefaultDir = managerDefaultDir
-      jsonData.LocalIP = getIp()
-      jsonData.PublicIp = getIp()
+      jsonData.LocalIP = localIP
+      jsonData.MatchmakerAddress = localIP
+      jsonData.PublicIp = localIP
       // return jsonData
       resolve(jsonData)
     });
@@ -171,7 +173,7 @@ export const killProcess = (pid) => {
 
 export const writeJson = (finalJson,path) => {
   return new Promise((resolve, reject) => {
-    console.log('========================================');
+    console.log('==============writeJson====================');
     // 写本地 JSON 文件
     try {
       fs.writeFileSync(path, JSON.stringify(finalJson, null, '\t'), 'UTF8');
@@ -286,7 +288,6 @@ export const getExePath = (selectedDir='') => {
 }
 
 const checkPath = (p) => {
-  console.log('p: ',p,path.isAbsolute(p))
 
   if(path.isAbsolute(p)){
     const currentDir1 = process.cwd()

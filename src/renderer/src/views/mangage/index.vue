@@ -1,79 +1,94 @@
 <template>
-  <div class="topbox">
-    <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
-      {{ alertMsg.content }}
-    </n-alert>
-    <div @click="router.push('/')" class="back">返回 /</div>
-  </div>
-  <div style="width: 100%;position: relative;top:50px;">
-    <div class="cards-box">
-      <n-card
-        closable
-        v-for="(client, index) in clients"
-        :key="index"
-        :title="`${client.address}:${client.port}`"
-        style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
-        @close="handleClose(client)"
-      >
-        <template #cover>
-          <img src="@/assets/img/bg.png" />
-        </template>
-        <div>
-          <span :style="{backgroundColor: client.streamConnected ? '#18a058' : '#c2f5ff'}" class="ball"></span>
-          连接数：{{ client.numConnectedClients }}个
-          <span @click="(showModal = true), (curtClient = client)" class="link-detail">
-            查看连接详情
-          </span>
+  <settingModel style="--cardWidth: 80%" title="推流管理">
+    <template #content>
+      <!-- <div class="topbox">
+        <n-alert v-if="alertMsg.done" :title="alertMsg.title" :type="alertMsg.type" closable>
+          {{ alertMsg.content }}
+        </n-alert>
+        <div @click="router.push('/')" class="back">返回 /</div>
+      </div> -->
+      <div style="width: 100%;position: relative;top:0px;">
+        <div class="cards-box">
+          <n-card
+            closable
+            v-for="(client, index) in clients"
+            :key="index"
+            :title="`${client.address}:${client.port}`"
+            style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
+            @close="handleClose(client)"
+          >
+            <template #cover>
+              <img src="@/assets/img/bg.png" />
+            </template>
+            <div>
+              <span :style="{backgroundColor: client.streamConnected ? '#18a058' : '#c2f5ff'}" class="ball"></span>
+              连接数：{{ client.numConnectedClients }}个
+              <span @click="(showModal = true), (curtClient = client)" class="link-detail">
+                查看连接详情
+              </span>
+            </div>
+          </n-card>
         </div>
-      </n-card>
-    </div>
-    <n-modal
-      v-model:show="showModal"
-      class="custom-card"
-      preset="card"
-      :style="bodyStyle"
-      title="连接详情"
-      size="huge"
-      :bordered="false"
-    >
-      <div class="playerbox" style="background-color: #5e5e63">
-        <span>用户ID</span>
-        <span style="flex: 1">来源</span>
-        <span>操作</span>
-      </div>
-      <div
-        v-for="(player, index) in curtClient.playerList"
-        :key="index"
-        class="playerbox"
-      >
-        <span>{{ player.playerId }}</span>
-        <span style="flex: 1">{{ player.playerSocket }}</span>
-        <span class="kick" @click="kick(player.playerId)">踢出</span>
-      </div>
-    </n-modal>
-  </div>
+        <n-modal
+          v-model:show="showModal"
+          class="custom-card"
+          preset="card"
+          :style="bodyStyle"
+          title="连接详情"
+          size="huge"
+          :bordered="false"
+        >
+          <div class="playerbox" style="background-color: #5e5e63">
+            <span>用户ID</span>
+            <span style="flex: 1">来源</span>
+            <span>操作</span>
+          </div>
+          <div
+            v-for="(player, index) in curtClient.playerList"
+            :key="index"
+            class="playerbox"
+          >
+            <span>{{ player.playerId }}</span>
+            <span style="flex: 1">{{ player.playerSocket }}</span>
+            <span class="kick" @click="kick(player.playerId)">踢出</span>
+          </div>
+        </n-modal>
+      </div>  
+    </template>
+  </settingModel>
 </template>
 
 <script setup>
-import { NCard, NModal, NAlert, NDataTable } from "naive-ui";
+import settingModel from '@/components/settingModal.vue'
+import { NCard, NModal, NAlert, NDataTable, pProps } from "naive-ui";
 import { useRouter } from "vue-router";
 import { queryClientList, killClientPlayer } from "@/api/server";
 import { ref, reactive } from "vue";
 import { killProcess } from '@/utils/core.js'
-const alertMsg = ref({
-  done: false,
-  title: '打开成功',
-  content: '打开成功',
-  reason: '',
-  exe: ''
-});
+// const alertMsg = ref({
+//   done: false,
+//   title: '打开成功',
+//   content: '打开成功',
+//   reason: '',
+//   exe: ''
+// });
+const props = defineProps({
+  alertMsg: {
+    type: Object,
+    required: true
+  },
+  isShow: {
+    type: [Object, Boolean],
+    required: true
+  },
+})
+const emit = defineEmits(['update:alertMsg'])
 const bodyStyle = {
   "--n-font-color": "#f4f4f4",
   "--n-color-modal": "#2c2c32",
   "--n-title-text-color": "#e0e0e1",
   "--n-text-color": "red",
 };
-const router = useRouter();
 const clients = ref([]);
 const curtClient = ref({});
 const showModal = ref(false);
@@ -81,13 +96,13 @@ const getClients = async (isRefresh = 0) => {
   const { data } = await queryClientList();
   if (data.code === 1001) {
     clients.value = data.value.cirrusServersArray;
-    console.log(clients.value);
+    // console.log(clients.value);
     if (isRefresh == 1) {
       refresh()
     }
   }
 };
-getClients();
+// getClients();
 const refresh = () => {
   if(Object.keys(curtClient.value).length == 0 ){
     return
@@ -111,53 +126,62 @@ const kick = async (playerid) => {
 
 const handleClose = async(client) => {
   let serverRes, clientRes
-  let exeType = '推流服务器'
   // 关闭该client下的所有pid
   console.log(client);
   if (client.clientPid){
     clientRes = await killProcess(client.clientPid)
-    exeType = '底座'
-    dealAlert(exeType, clientRes)
+    dealAlert('底座', clientRes,client.clientPid)
+  }
+  if (client.turnPid){
+    clientRes = await killProcess(client.turnPid)
+    dealAlert('中继服务器turn', clientRes,client.turnPid)
   }
   serverRes = await killProcess(client.serverPid)
-  dealAlert(exeType, serverRes)
+  dealAlert('推流服务器', serverRes,client.serverPid)
   return
 };
-const dealAlert = (exeType, res) => {
-  console.log('alert收到====',res);
+const dealAlert = (exeType, res, pid) => {
+  console.log('alert收到====',exeType,res,pid);
   if (res===1) {
-    alertMsg.value = {
+    emit('update:alertMsg',{
       done: true,
       type: 'success',
       title: `${exeType}关闭成功`,
-      content: '该进程已被杀死',
+      content: `该进程${pid}已被杀死`,
       reason: '',
-    }
-    getClients()
-  }else{
-    alertMsg.value = {
-      done: true,
-      type: 'success',
-      title: `${exeType}关闭失败`,
-      content: '该进程未被杀死 请手动关闭',
-      reason: '',
-    }
+    })
   }
+  // else{
+  //   alertMsg.value = {
+  //     done: true,
+  //     type: 'success',
+  //     title: `${exeType}关闭失败`,
+  //     content: `该进程${pid}未被杀死 请手动关闭`,
+  //     reason: '',
+  //   }
+  // }
 }
 
 const timer = ref(null);
-
-timer.value = setInterval(() => {
-  getClients(1)
-}, 1000);
-
 watchEffect(() => {
-  if (alertMsg.value.done) {
-    setTimeout(() => {
-      alertMsg.value.done = false;
-    }, 2000)
+  if(props.isShow){
+    getClients();
+    timer.value = setInterval(() => {
+      getClients(1)
+    }, 3000);
+  }else{
+    clearInterval(timer.value);
+    timer.value = null
   }
 })
+
+// watchEffect(() => {
+//   if (alertMsg.value.done) {
+//     setTimeout(() => {
+//       alertMsg.value.done = false;
+//     }, 2000)
+//   }
+// })
 onUnmounted(() => {
   clearInterval(timer.value);
   timer.value = null

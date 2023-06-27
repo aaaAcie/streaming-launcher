@@ -1,15 +1,6 @@
 <template>
   <div class="app">
-    <keep-alive>
-      <router-view></router-view>
-    </keep-alive>
-    <!-- <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <keep-alive>
-          <component :is="Component"></component>
-        </keep-alive>
-      </transition>
-    </router-view> -->
+    <router-view></router-view>
   </div>
 </template>
 
@@ -19,6 +10,11 @@ import { openEXE } from '@/utils/core.js'
 // 启动manager  
 // openEXE 会自己判断路径
 openEXE("manager.exe", "..\\manager");
+
+// 应该在这里监听window.electron.ipcRenderer.once('receiveFromWeb', (event, arg) => {})
+
+
+
 </script>
 
 <style scoped>

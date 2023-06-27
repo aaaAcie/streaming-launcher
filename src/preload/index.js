@@ -28,6 +28,7 @@ if (process.contextIsolated) {
       getDirectory: (name) => ipcRenderer.invoke('getDirectory',name),
       getExeFile: (folderPath,suffix) => ipcRenderer.invoke('getDirectory',folderPath,suffix),
       notifyIPC: (command,clientId,data) => ipcRenderer.invoke('notifyIPC',command,clientId,data),
+      addPid : (cmdStr,pid) => ipcRenderer.invoke('addPid', cmdStr, pid),
     })
     contextBridge.exposeInMainWorld('api', api)
   } catch (error) {

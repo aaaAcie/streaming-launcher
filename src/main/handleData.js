@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-12 12:27:39
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-19 11:27:47
+ * @LastEditTime: 2023-06-21 17:37:26
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\handleData.js
  * @Description: 
  * 
@@ -28,6 +28,10 @@ export const handleData = (workerProcessList,mainWindow) => {
     }
     
     return command
+  })
+  ipcMain.handle('addPid', (e,cmdStr,pid) => {
+    workerProcessList.push({cmdStr,pid})
+    return true
   })
   ipcMain.handle('addTab', (e,url,params) => {
     let workerProcess = createTab(mainWindow, url)

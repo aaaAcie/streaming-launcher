@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-15 09:40:25
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-20 18:09:24
+ * @LastEditTime: 2023-06-25 18:06:05
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\ws.js
  * @Description: 
  * 
@@ -20,9 +20,9 @@ const getServer = (clientMap, port,that,mainWindow) => {
     const clientId = extractIPv4Address(req.socket.remoteAddress) + ':' + req.socket.remotePort;
     console.log(clientId)
     clientMap.set(clientId, ws);
-    
+    let timer = null
     ws.on('message', (msgRaw) => {
-      console.log(`Received message ${msgRaw} from client ${clientId}`);
+      // console.log(`Received message ${msgRaw} from client ${clientId}`);
       var message;
       try {
         message = JSON.parse(msgRaw);
@@ -33,9 +33,17 @@ const getServer = (clientMap, port,that,mainWindow) => {
       }
       // { type: 'openExe',  name: 'ue' }
       if (message.type === 'openExe') {
-        console.log(message);
+        // 这里也需要一个防抖
+        console.log('openExe:----------->',message,Date.now());
         message.clientId = clientId
+        if(timer){
+          return 
+        }
+        timer = setTimeout(() => {
+          timer = null
+        }, 4000)
         mainWindow.webContents.send('receiveFromWeb', message);
+
 
       }else if(message.type === 'getData'){
         if (message.name === 'scene') {

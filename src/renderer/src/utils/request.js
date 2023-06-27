@@ -2,27 +2,9 @@
 // const axios = require('axios').default
 
 import axios from 'axios'
+import {getRightUrlFromWeb} from './fns.js'
 // import { BASE_URL } from './basic.js'
 const BASE_URL = 'http://115.238.181.246:10010'
-let BASE_URL_Server
-const geturlLocal = () => {
-  let url
-  if (typeof localStorage.MatchmakerAddress !== 'undefined') {
-    console.log('localStorage.MatchmakerAddress: ',localStorage.MatchmakerAddress,localStorage.managerPort);
-    url = 'http://' + JSON.parse(localStorage.MatchmakerAddress) + ':' + JSON.parse(localStorage.managerPort)
-  }else{
-    url = "http://localhost:83"
-  }
-  return url
-}
-window.addEventListener('storage', (event) => {
-  if (event.key === 'MatchmakerAddress' || event.key === 'managerPort') {
-    BASE_URL_Server = geturlLocal()
-    console.log('修改MatchmakerAddress成功：',BASE_URL_Server);
-  }
-});
-
-BASE_URL_Server = geturlLocal()
 
 const request = axios.create({
   // timeout: 5000
@@ -30,13 +12,13 @@ const request = axios.create({
   // baseURL: 'http://115.238.181.246:10010'
 })
 
-
 function getBaseURL (url) {
   // console.log(BASE_URL_Server+url)
   if (url.startsWith('/server')) {
     // return "http://192.168.6.227:83" // 对应83端口
     // return "http://192.168.2.128:83" // 对应83端口
-    return BASE_URL_Server
+    // return 
+    return getRightUrlFromWeb.fullUrl
   }else{
     return BASE_URL
   }
