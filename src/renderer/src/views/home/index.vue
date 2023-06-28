@@ -353,12 +353,14 @@ const dealOpenServer = async() => {
   // 若当前有推流服务器开启 return
   let nb = await getClients()
   console.log('nmberOfCirrusServers:',nb)
-  if( nb > 0){
+  let limitNB = localStorage.getItem('limitNB') || 'x'
+  let realNB = limitNB === 'x' ? 0 : 10
+  if( nb > realNB){
     alertMsg.value = {
       done: true,
       type: 'warning',
       title: '开启失败',
-      content: `试用版仅支持一路并发，请关闭已有连接后再次启动`,
+      content: `试用版仅支持${realNB+1}路并发，请关闭已有连接后再次启动`,
       reason: ''
     }
 

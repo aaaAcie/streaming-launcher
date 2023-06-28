@@ -246,7 +246,7 @@ onUnmounted(() => {
   color: #f4f4f4;
   border: none;
   width: 282px;
-  margin-right: 40px;
+  margin-right: 20px;
 
   img {
     width: 282px;

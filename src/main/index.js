@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 09:46:04
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 17:58:14
+ * @LastEditTime: 2023-06-28 10:27:38
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\index.js
  * @Description: 
  * 
@@ -27,7 +27,7 @@ function createWindow() {
       sandbox: false
     }
   })
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   handleData(workerProcessList,mainWindow)
 
