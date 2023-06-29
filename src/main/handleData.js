@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-12 12:27:39
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 17:37:26
+ * @LastEditTime: 2023-06-29 10:05:24
  * @FilePath: \mx\UE-launcher3\electron-app\src\main\handleData.js
  * @Description: 
  * 
@@ -12,23 +12,22 @@ import { join } from 'path'
 import {createTab,createEXE3,getIp,readJson,openDialog,getExePath,killProcess,writeJson,getDirectory} from './createWin'
 import { webServer } from './ws'
 export const handleData = (workerProcessList,mainWindow) => {
-  // console.log('==mainWindow1=',mainWindow)
 
-  const myWebServer = new webServer(8811,mainWindow)
-  ipcMain.handle('notifyIPC', (e,command,clientId,rawdata) => {
-    let data = JSON.parse(rawdata)
-    console.log('-------------------',command,data,typeof data)
-    if(command==='startStreaming'){
+  // const myWebServer = new webServer(8811,mainWindow)
+  // ipcMain.handle('notifyIPC', (e,command,clientId,rawdata) => {
+  //   let data = JSON.parse(rawdata)
+  //   console.log('-------------------',command,data,typeof data)
+  //   if(command==='startStreaming'){
 
-      myWebServer.sendToClient(clientId, {
-        type:'openExe',
-        name: 'ue',
-        port: data
-      })
-    }
+  //     myWebServer.sendToClient(clientId, {
+  //       type:'openExe',
+  //       name: 'ue',
+  //       port: data
+  //     })
+  //   }
     
-    return command
-  })
+  //   return command
+  // })
   ipcMain.handle('addPid', (e,cmdStr,pid) => {
     workerProcessList.push({cmdStr,pid})
     return true
@@ -60,7 +59,7 @@ export const handleData = (workerProcessList,mainWindow) => {
       const data = await getExePath()
       return data
     }else if (configType == 'SecenePath') {
-      myWebServer.updateSecenePath(path)
+      // myWebServer.updateSecenePath(path)
       return path
     }
   })

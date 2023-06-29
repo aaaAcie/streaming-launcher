@@ -251,6 +251,7 @@ onUnmounted(() => {
   img {
     width: 282px;
     height: 160px;
+    
   }
 }
 

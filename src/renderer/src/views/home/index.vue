@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-28 18:09:16
+ * @LastEditTime: 2023-06-29 10:14:09
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -28,25 +28,25 @@
     当前IP为
     <code>{{ ip }}</code>
     <!-- <span @click="router.push('/mangage')" style="cursor: pointer;padding-left: 20px; text-decoration: underline;">管理后台</span> -->
-    <!-- <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">点击复制推流接口</a> -->
-
+    <a @click="copyToClipboard()" style="cursor: pointer;margin-left: 20px;">推流接口</a>
+    <a @click="copyToClipboard('url')" style="cursor: pointer;margin-left: 20px;">推流网址</a>
   </p>
 
   <div class="features">
     <div class="feature-item">
       <article>
-        <h2 class="title">MXDATA</h2>
+        <h2 class="title">推流网址</h2>
         <div class="btns">
-          <n-button @click="handleJump('MXDATA')">启动</n-button>
+          <n-button @click="handleJump('MXDATA')">打开</n-button>
         </div>
       </article>
     </div>
     <div class="feature-item">
       <article>
-        <h2 class="title">EVR</h2>
+        <h2 class="title">网页服务器</h2>
         <div class="btns">
           <n-button @click="handleJump('EVR')">启动</n-button>
-          <n-button @click="setModal('EVR')">设置</n-button>
+          <!-- <n-button @click="setModal('EVR')">设置</n-button> -->
         </div>
         <!-- <p class="detail">
           <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
@@ -130,7 +130,7 @@ const showModalEVR = ref(false)
 const showModalUE = ref(false)
 const showModalMangage = ref(false)
 const openUE = ref(true)
-const openTurn = ref(false)
+const openTurn = ref(true)
 // const serverPath = ".\\resources\\推流综合服务器"
 const serverPath = "..\\推流综合服务器"
 
@@ -270,12 +270,13 @@ watchEffect(() => {
 const handleJump = async(data) => {
   if (data === "MXDATA") {
     console.log("MXDATA");
-    tabAdd("http://115.238.181.246:18288/customPage/mxdata?menu=project", "ddd");
-    // tabAdd(keyUrl.value + "/server/redirectBlankPushStreamServerURL", "ddd");
+    // tabAdd("http://115.238.181.246:18288/customPage/mxdata?menu=project", "ddd");
+    tabAdd(keyUrl.value + "/server/redirectBlankPushStreamServerURL", "ddd");
 
   } else if (data === "EVR") {
-    console.log("EVR", defaultConfig.evrDefaultDir);
-    openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, ['-EVR']);
+    // console.log("EVR", defaultConfig.evrDefaultDir);
+    openEXE("mxxx.exe", "..\\MX-Localdev", []);
+    // openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, ['-EVR']);
     // openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
   } else {
     console.log('defaultConfig: ',defaultConfig.value)
@@ -304,8 +305,11 @@ const chooseFile = (name) => {
   }
 }
 
-const copyToClipboard = () => {
+const copyToClipboard = (param='') => {
   let text = keyUrl.value + '/server/queryBlankPushStreamServer'
+  if (param=='url') {
+    text = keyUrl.value + "/server/redirectBlankPushStreamServerURL"
+  }
 
   console.log('keyUrl: ',text)
   navigator.clipboard.writeText(text)
@@ -357,7 +361,7 @@ const dealOpenServer = async() => {
   let nb = await getClients()
   console.log('nmberOfCirrusServers:',nb)
   let limitNB = localStorage.getItem('limitNB') || 'x'
-  let realNB = limitNB === 'x' ? 0 : 10
+  let realNB = limitNB === 'x' ? 5 : 10
   if( nb > realNB){
     alertMsg.value = {
       done: true,
@@ -372,7 +376,7 @@ const dealOpenServer = async() => {
 
   if (openTurn.value) {
     // test.ps1 会去打开cirrus3
-    openEXE2("powershell.exe", serverPath,['-ExecutionPolicy', 'Bypass', '-File','test6.ps1'], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
+    openEXE2("powershell.exe", serverPath, ['-ExecutionPolicy', 'Bypass', '-File','test6.ps1'], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
       ({pid}) => {
         dealOpenUE(pid)
       }
