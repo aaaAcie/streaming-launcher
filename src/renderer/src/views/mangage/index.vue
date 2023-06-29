@@ -15,7 +15,7 @@
             :key="index"
             :title="`${client.address}:${client.port}`"
             style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
-            @close="handleCloseByMangage(client)"
+            @close="handleCloseByMangager(client)"
           >
             <template #cover>
               <img src="@/assets/img/bg.png" />
@@ -140,8 +140,8 @@ const handleClose = async(client) => {
   dealAlert('推流服务器', serverRes,client.serverPid)
   return
 };
-// 通过连接的mangage通知指定的client去自行关闭
-const handleCloseByMangage = async(client) => {
+// 通过连接的mangager通知指定的client去自行关闭
+const handleCloseByMangager = async(client) => {
   const { data } = await killPushStreamServer({...client})
   console.log(data)
 }

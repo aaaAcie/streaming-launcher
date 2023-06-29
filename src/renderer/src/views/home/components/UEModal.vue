@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 16:02:18
+ * @LastEditTime: 2023-06-29 17:09:00
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -43,13 +43,27 @@
       <br />
       <div class="box">
         <span style="width: 300px;">
-          服务器：<n-checkbox v-model:checked="openLocalServer" class="info" style="margin-left: 8px;--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">本地</n-checkbox>
+          服务器：
+          <!-- <n-checkbox v-model:checked="openLocalServer" class="info" style="margin-left: 8px;--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">本地</n-checkbox> -->
+          <n-radio-group v-model:value="value" name="radiogroup" style="margin-left: 8px;">
+            <n-space>
+              <n-radio v-for="s in serverOptions" :key="s.value" :value="s.value" style="--n-text-color: #c2f5ff;--n-color: #2f3241;--n-box-shadow:none;">
+                {{ s.label }}
+              </n-radio>
+            </n-space>
+            <!-- <n-radio-button
+              v-for="s in serverOptions"
+              :key="s.value"
+              :value="s.value"
+              :label="s.label"
+              style="--n-button-text-color: #c2f5ff;--n-button-text-color-active: #c2f5ff;--n-button-color-active: #2f3241;--n-box-shadow:none;">
+            </n-radio-button> -->
+          </n-radio-group>
         </span>
         <div class="des">
-          <MxInput v-model:data="props.defaultConfig.MatchmakerAddress" title="服务端IP" :isInput="false"></MxInput>
-          <MxInput v-model:data="props.defaultConfig.managerPort" title="http端口" :isInput="false"></MxInput>
-          <MxInput v-model:data="props.defaultConfig.MatchmakerPort" title="ws端口" :isInput="false"></MxInput>
-
+          <MxInput v-model:data="props.defaultConfig.MatchmakerAddress" title="服务端IP" :isInput="value==='customize' ? true : false"></MxInput>
+          <MxInput v-model:data="props.defaultConfig.managerPort" title="http端口" :isInput="value==='customize' ? true : false"></MxInput>
+          <MxInput v-model:data="props.defaultConfig.MatchmakerPort" title="ws端口" :isInput="value==='customize' ? true : false"></MxInput>
         </div>
       </div>
     </template>
@@ -65,7 +79,7 @@
 
 <script setup>
   import { ref,watch } from 'vue'
-  import { NCheckbox, NButton } from 'naive-ui'
+  import { NCheckbox, NRadioGroup, NSpace, NRadio,NRadioButton } from 'naive-ui'
   import settingModel from '@/components/settingModal.vue'
   import { tabAdd, openEXE, getCofig,writeJson,getDirectory,notifyIPC } from '@/utils/core.js'
   import MxInput from '@/components/mxInput.vue';
@@ -86,13 +100,26 @@
   })
   let turnRef = ref('') // 用showRef去接收show
   let openLocalServer = ref(true) // 默认为本地
+  const value = ref('local')
+  const serverOptions = [{
+    value: "local",
+    label: "本地"
+  },{
+    value: "mx",
+    label: "美象"
+  },{
+    value: "customize",
+    label: "自定义"
+  }]
   onMounted(() => {
     turnRef.value = props.openTurn
     console.log(props.showModal)
     if(props.defaultConfig?.MatchmakerAddress?.startsWith('192')){
-      openLocalServer.value = true
+      // openLocalServer.value = true
+      value.value = 'local'
     }else{
-      openLocalServer.value = false
+      // openLocalServer.value = false
+      value.value = 'mx'
     }
   })
   watch(
@@ -101,14 +128,16 @@
   )
   const emit = defineEmits(['setShowValue'])
   watchEffect(() => {
+    // console.log(value.value)
     // 不为本地
-    if (!openLocalServer.value) {
+    // if (!openLocalServer.value) {
+    if (value.value === 'mx') {
       props.defaultConfig.MatchmakerAddress = "115.238.181.246"
       props.defaultConfig.MatchmakerPort = "12002"
       props.defaultConfig.managerPort = "12001"
-    }else{
-      // props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
-      props.defaultConfig.MatchmakerAddress = "192.168.2.128"
+    }else if(value.value === 'local'){
+      // props.defaultConfig.MatchmakerAddress = "192.168.2.128"
+      props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
       props.defaultConfig.MatchmakerPort = "9990"
       props.defaultConfig.managerPort = "83"
     }
@@ -143,17 +172,7 @@
       return name
     }
   })
-  // const setValue = (type, data) => {
-  //   console.log(type, data)
-  //   // props.defaultConfig.StreamerPort = data
-  // }
-const onPositiveClick = () => {
-  emit('setShowValue', false)
-}
 
-const onNegativeClick = () => {
-  emit('setShowValue', false)
-}
 </script>
 
 <style lang="less" scoped>
