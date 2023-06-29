@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-27 10:52:50
+ * @LastEditTime: 2023-06-28 18:09:16
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -161,7 +161,7 @@ const keyUrl = ref('')
 const clientId = ref(0)
 useFeebackDealer(keyMsg, alertMsg)
 
-const dealWS = (data) => {
+const dealWS = async(data) => {
   console.log(data)
   if(data.name === 'evr') {
     // openEXE2("mxxx.exe", ".\\resources\\win-unpacked", []);
@@ -172,7 +172,10 @@ const dealWS = (data) => {
     clientId.value = data.clientId
     // return
     // 若已有进行中的实例，直接通知前端连接
-    if(!dealOpenServer()){
+    let res = await dealOpenServer()
+    // console.log('结果为 ',res)
+    if(!res){
+      console.log('跳过open exe，直接返回')
       // 提醒前端可以开始推流连接
       notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
     }
