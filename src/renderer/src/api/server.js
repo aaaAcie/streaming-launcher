@@ -46,3 +46,12 @@ export const updatePushStreamServer = (data) =>{
     data
   })
 }
+
+// 下线推流服务器
+export const killPushStreamServer = (data) =>{
+  return request({
+    method: 'post',
+    url: '/server/killPushStreamServer',
+    data
+  })
+}

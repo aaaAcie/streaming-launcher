@@ -169,7 +169,7 @@ export const killProcess = (pid) => {
       return 0
     }
   }else{
-    console.error(`没有收到进程 ${pid}：${err}`);
+    console.error(`没有收到进程 ${pid}`);
 
   }
 }

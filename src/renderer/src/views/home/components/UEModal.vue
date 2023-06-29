@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 13:58:59
+ * @LastEditTime: 2023-06-29 16:02:18
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -107,7 +107,8 @@
       props.defaultConfig.MatchmakerPort = "12002"
       props.defaultConfig.managerPort = "12001"
     }else{
-      props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
+      // props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
+      props.defaultConfig.MatchmakerAddress = "192.168.2.128"
       props.defaultConfig.MatchmakerPort = "9990"
       props.defaultConfig.managerPort = "83"
     }

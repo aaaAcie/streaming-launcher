@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 13:32:47
+ * @LastEditTime: 2023-06-29 16:01:38
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -385,7 +385,7 @@ const dealOpenServer = async() => {
     );
   }else{
     // 直接进入这里
-    openEXE2("cirrus3.3.exe", serverPath, [], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
+    openEXE2("cirrus3.4.exe", serverPath, [], {port:defaultConfig.value.HttpPort, address:ip.value}).then(
       ({pid}) => {
         dealOpenUE(pid)
       }

@@ -15,7 +15,7 @@
             :key="index"
             :title="`${client.address}:${client.port}`"
             style="--n-title-text-color: #f4; --n-padding-left: 10px;margin-bottom: 20px;"
-            @close="handleClose(client)"
+            @close="handleCloseByMangage(client)"
           >
             <template #cover>
               <img src="@/assets/img/bg.png" />
@@ -62,7 +62,7 @@
 import settingModel from '@/components/settingModal.vue'
 import { NCard, NModal, NAlert, NDataTable, pProps } from "naive-ui";
 import { useRouter } from "vue-router";
-import { queryClientList, killClientPlayer } from "@/api/server";
+import { queryClientList, killClientPlayer, killPushStreamServer } from "@/api/server";
 import { ref, reactive } from "vue";
 import { killProcess } from '@/utils/core.js'
 // const alertMsg = ref({
@@ -140,6 +140,12 @@ const handleClose = async(client) => {
   dealAlert('推流服务器', serverRes,client.serverPid)
   return
 };
+// 通过连接的mangage通知指定的client去自行关闭
+const handleCloseByMangage = async(client) => {
+  const { data } = await killPushStreamServer({...client})
+  console.log(data)
+}
+
 const dealAlert = (exeType, res, pid) => {
   console.log('alert收到====',exeType,res,pid);
   if (res===1) {
