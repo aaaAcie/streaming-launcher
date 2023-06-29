@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 14:56:28
+ * @LastEditTime: 2023-06-29 13:58:59
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -42,10 +42,14 @@
       </div>
       <br />
       <div class="box">
-        <span style="width: 70px;">服务器：</span>
+        <span style="width: 300px;">
+          服务器：<n-checkbox v-model:checked="openLocalServer" class="info" style="margin-left: 8px;--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">本地</n-checkbox>
+        </span>
         <div class="des">
           <MxInput v-model:data="props.defaultConfig.MatchmakerAddress" title="服务端IP" :isInput="false"></MxInput>
-          <MxInput v-model:data="props.defaultConfig.managerPort" title="服务端口" :isInput="false"></MxInput>
+          <MxInput v-model:data="props.defaultConfig.managerPort" title="http端口" :isInput="false"></MxInput>
+          <MxInput v-model:data="props.defaultConfig.MatchmakerPort" title="ws端口" :isInput="false"></MxInput>
+
         </div>
       </div>
     </template>
@@ -81,26 +85,34 @@
     showModal: [Boolean,Object],
   })
   let turnRef = ref('') // 用showRef去接收show
+  let openLocalServer = ref(true) // 默认为本地
   onMounted(() => {
     turnRef.value = props.openTurn
     console.log(props.showModal)
+    if(props.defaultConfig?.MatchmakerAddress?.startsWith('192')){
+      openLocalServer.value = true
+    }else{
+      openLocalServer.value = false
+    }
   })
   watch(
     () => { props.defaultConfig.MatchmakerAddress },
     (newV,oldv) => { console.log(newV) },
   )
   const emit = defineEmits(['setShowValue'])
-  const bodyStyle = {
-    "--n-text-color": "#c2f5ff",
-    "--n-color": "#2f3241",
-    "--n-border": "1px solid #c2f5ff",
-    "padding-right": "3px",
-  }
-  const btnStyle = {
-    "--n-text-color": "#fff",
-    // "--n-color": "#2f3241",
-    // "--n-border": "1px solid #c2f5ff",
-  }
+  watchEffect(() => {
+    // 不为本地
+    if (!openLocalServer.value) {
+      props.defaultConfig.MatchmakerAddress = "115.238.181.246"
+      props.defaultConfig.MatchmakerPort = "12002"
+      props.defaultConfig.managerPort = "12001"
+    }else{
+      props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
+      props.defaultConfig.MatchmakerPort = "9990"
+      props.defaultConfig.managerPort = "83"
+    }
+    
+  },{ flush: 'post' })
   // 触发父组件
   const chooseFile = (name) => {
     if(name==='ue'){

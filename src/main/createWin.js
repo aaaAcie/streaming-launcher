@@ -105,14 +105,17 @@ export const readJson = (path) => {
       const localIP = getIp()
       
       // 处理数据
-      jsonData.managerPort = await readYml()
+      // jsonData.managerPort = await readYml()
       console.log(jsonData);
       const {ueDefaultDir, evrDefaultDir,managerDefaultDir} = getDefaultPath()
       jsonData.ueDefaultDir = ueDefaultDir
       jsonData.evrDefaultDir = evrDefaultDir
       jsonData.managerDefaultDir = managerDefaultDir
       jsonData.LocalIP = localIP
-      jsonData.MatchmakerAddress = localIP
+      if (jsonData.MatchmakerAddress.startsWith("192")) {
+        // 若json里存的是局域网，则更新，否则不改变初始值。
+        jsonData.MatchmakerAddress = localIP
+      }
       jsonData.PublicIp = localIP
       // return jsonData
       resolve(jsonData)

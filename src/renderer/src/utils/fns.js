@@ -43,12 +43,14 @@ export const getClearStr = (a,b) => {
 export const getRightUrlFromWeb =  {
   MatchmakerAddress: '127.0.0.1',
   managerPort: '83',
+  MatchmakerPort: '9990',
   get fullUrl() {
     return getClearStr(this.MatchmakerAddress, this.managerPort);
   },
   
-  set fullUrl([a,b]) {
+  set fullUrl([a,b,c]) {
     this.MatchmakerAddress = a;
     this.managerPort = b;
+    this.MatchmakerPort = c;
   }
 }

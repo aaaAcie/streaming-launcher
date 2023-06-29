@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-28 18:09:16
+ * @LastEditTime: 2023-06-29 13:32:47
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -243,7 +243,7 @@ const initConfig = () => {
     // defaultConfig.value.MatchmakerAddress = "192.168.2.128"
     console.log("defaultConfig: ",defaultConfig.value)
     keyUrl.value = 'http://' + d.MatchmakerAddress + ':' + d.managerPort
-    getRightUrlFromWeb.fullUrl = [d.MatchmakerAddress, d.managerPort]
+    getRightUrlFromWeb.fullUrl = [d.MatchmakerAddress, d.managerPort, d.MatchmakerPort]
     
     getCofig('SecenePath', defaultConfig.value.evrDefaultDir).then(fileData => {
       console.log(fileData,'发送成功')
@@ -267,6 +267,12 @@ watchEffect(() => {
     }, 3000)
   }
 })
+watchEffect(() => {
+  if (defaultConfig.value.MatchmakerAddress) {
+    getRightUrlFromWeb.fullUrl = [defaultConfig.value.MatchmakerAddress, defaultConfig.value.managerPort]
+  }
+})
+
 const handleJump = async(data) => {
   if (data === "MXDATA") {
     console.log("MXDATA");

@@ -55,6 +55,7 @@
     background-color: #2f3241;
     color: #c2f5ff;
     width: 60%;
+    // min-width: 50px;
   }
   .readonly{
     border: none;
