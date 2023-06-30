@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-14 17:48:38
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-21 17:41:48
+ * @LastEditTime: 2023-06-30 17:27:17
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\utils\core.js
  * @Description: 
  * 
@@ -33,7 +33,7 @@ export const openEXE = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) =>
         port,
         serverPid: pid
       })
-      console.log(data)
+      // console.log(data)
     }else if(cmdStr.startsWith('MxWorld')){
       port = updateConfig['port']
       address = updateConfig['address']
@@ -44,7 +44,7 @@ export const openEXE = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) =>
         clientPid: pid,
         clientPath: cmdPath
       })
-      console.log(data)
+      // console.log(data)
     }
     if (pid) {
       resolve(response)
@@ -101,7 +101,7 @@ export const notifyIPC = async (command,clientId,data) => {
 };
 
 export const updateData = async(streamData,tryTime=1,time=3000) => {
-  if (tryTime > 2) {
+  if (tryTime > 4) {
     // 每隔5s尝试一次 尝试5次
     console.log('与manager建立连接失败')
     return streamData + '与manager建立连接失败'
@@ -116,7 +116,7 @@ export const updateData = async(streamData,tryTime=1,time=3000) => {
       if (data.code===1001) {
         resolve(data)
       }else{
-        updateData(streamData,tryTime+1,5000)
+        updateData(streamData,tryTime+1,8000)
       }
     })
   }, time)
