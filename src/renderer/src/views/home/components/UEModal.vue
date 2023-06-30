@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 17:09:00
+ * @LastEditTime: 2023-06-30 15:21:31
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -45,7 +45,7 @@
         <span style="width: 300px;">
           服务器：
           <!-- <n-checkbox v-model:checked="openLocalServer" class="info" style="margin-left: 8px;--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">本地</n-checkbox> -->
-          <n-radio-group v-model:value="value" name="radiogroup" style="margin-left: 8px;">
+          <n-radio-group v-model:value="value" name="radiogroup" style="margin-left: 8px;" @update:value="handleChangeRaido">
             <n-space>
               <n-radio v-for="s in serverOptions" :key="s.value" :value="s.value" style="--n-text-color: #c2f5ff;--n-color: #2f3241;--n-box-shadow:none;">
                 {{ s.label }}
@@ -99,7 +99,6 @@
     showModal: [Boolean,Object],
   })
   let turnRef = ref('') // 用showRef去接收show
-  let openLocalServer = ref(true) // 默认为本地
   const value = ref('local')
   const serverOptions = [{
     value: "local",
@@ -113,37 +112,35 @@
   }]
   onMounted(() => {
     turnRef.value = props.openTurn
-    console.log(props.showModal)
-    if(props.defaultConfig?.MatchmakerAddress?.startsWith('192')){
-      // openLocalServer.value = true
-      value.value = 'local'
+    console.log(props.showModal,props.defaultConfig?.MatchmakerType)
+    // 如果有MatchmakerType
+    if(props.defaultConfig?.MatchmakerType){
+      value.value = props.defaultConfig?.MatchmakerType
     }else{
-      // openLocalServer.value = false
-      value.value = 'mx'
+      if(props.defaultConfig?.MatchmakerAddress?.startsWith('192')){
+        value.value = 'local'
+      }else{
+        value.value = 'mx'
+      }
     }
   })
-  watch(
-    () => { props.defaultConfig.MatchmakerAddress },
-    (newV,oldv) => { console.log(newV) },
-  )
+// 更新Matchmaker的配置
+const handleChangeRaido = () => {
+  if (value.value === 'mx') {
+    props.defaultConfig.MatchmakerAddress = "115.238.181.246"
+    props.defaultConfig.MatchmakerPort = "12002"
+    props.defaultConfig.managerPort = "12001"
+  }else if(value.value === 'local'){
+    // props.defaultConfig.MatchmakerAddress = "192.168.2.128"
+    props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
+    props.defaultConfig.MatchmakerPort = "9990"
+    props.defaultConfig.managerPort = "83"
+  }
+  props.defaultConfig.MatchmakerType = value.value
+  console.log('将matchmakertype更新为, ', value.value)
+}
   const emit = defineEmits(['setShowValue'])
-  watchEffect(() => {
-    // console.log(value.value)
-    // 不为本地
-    // if (!openLocalServer.value) {
-    if (value.value === 'mx') {
-      props.defaultConfig.MatchmakerAddress = "115.238.181.246"
-      props.defaultConfig.MatchmakerPort = "12002"
-      props.defaultConfig.managerPort = "12001"
-    }else if(value.value === 'local'){
-      // props.defaultConfig.MatchmakerAddress = "192.168.2.128"
-      props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
-      props.defaultConfig.MatchmakerPort = "9990"
-      props.defaultConfig.managerPort = "83"
-    }
-    
-  },{ flush: 'post' })
-  // 触发父组件
+
   const chooseFile = (name) => {
     if(name==='ue'){
       // 选择ue的windows文件夹 将会自动寻找到/MxWorld/Binaries/Win64里的exe文件，才能做到关闭启动器，把ue一起关闭。

@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 16:01:38
+ * @LastEditTime: 2023-06-30 15:03:53
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -272,7 +272,11 @@ watchEffect(() => {
     getRightUrlFromWeb.fullUrl = [defaultConfig.value.MatchmakerAddress, defaultConfig.value.managerPort]
   }
 })
-
+watchEffect(() => {
+  if (defaultConfig.value.managerPort) {
+    getRightUrlFromWeb.fullUrl = [defaultConfig.value.MatchmakerAddress, defaultConfig.value.managerPort]
+  }
+})
 const handleJump = async(data) => {
   if (data === "MXDATA") {
     console.log("MXDATA");
@@ -284,7 +288,7 @@ const handleJump = async(data) => {
     openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, ['-EVR']);
     // openEXE2("LauncherEVR.exe", defaultConfig.evrDefaultDir || "..\\Windows", []);
   } else {
-    console.log('defaultConfig: ',defaultConfig.value)
+    // console.log('defaultConfig: ',defaultConfig.value)
     dealOpenServer()
   }
 };
@@ -351,10 +355,10 @@ const dealOpenServer = async() => {
   // 覆盖json文件
   // let finalJson = { ...defaultConfig.value, ...portConfig}
   let finalJson = defaultConfig.value
-  console.log('finalJson: ',finalJson)
+  console.log('执行的json为: ',finalJson)
 
   let res = await writeJson(finalJson, serverJSONPath)
-  console.log(res)
+  console.log('writeJson: ', res)
 
 
   console.log('openTurn,openUE : ',openTurn.value,openUE.value)

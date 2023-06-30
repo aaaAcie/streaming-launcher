@@ -112,7 +112,7 @@ export const readJson = (path) => {
       jsonData.evrDefaultDir = evrDefaultDir
       jsonData.managerDefaultDir = managerDefaultDir
       jsonData.LocalIP = localIP
-      if (jsonData.MatchmakerAddress.startsWith("192")) {
+      if (jsonData.MatchmakerType?.startsWith("local")) {
         // 若json里存的是局域网，则更新，否则不改变初始值。
         jsonData.MatchmakerAddress = localIP
       }
