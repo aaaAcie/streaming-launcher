@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-30 15:03:53
+ * @LastEditTime: 2023-07-03 17:03:27
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -64,45 +64,20 @@
         </div>
         <div class="btns">
           <n-button @click="handleJump('推流服务器')">启动</n-button>
-          <n-button @click="setModal('ue')">设置</n-button>
-          <!-- <n-button @click="router.push({name: 'mangage'})">列表</n-button> -->
-          
+          <n-button @click="setModal('ue')">设置</n-button> 
           <n-button @click="showModalMangage = true">列表</n-button>
-
         </div>
-        <!--<p class="detail">
-          <div v-for="(k, v) in defaultConfig" :key="k">
-            <n-checkbox v-if="v === 'TurnPort'" v-model:checked="openTurn" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff;padding-right: 3px;"></n-checkbox>
-            <span style="color: #73a5b1;">{{ v }}:</span>
-            <input class="config-input" type="text" v-model="defaultConfig[v]" />
-          </div>
-        </p> -->
       </article>
     </div>
   </div>
   <div>
     <EVRModal v-model:show="showModalEVR" :UEfile="UEfile" :defaultConfig="defaultConfig"></EVRModal>
     <!-- <UEModal v-model:show="showModalUE" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value"></UEModal> -->
-    <UEModal v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
+    <UEModal v-if="finishGetConfig" v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
     <template #checkbox>
       <n-checkbox v-model:checked="openTurn" :style="checkboxStyle" style="padding-right: 2px;"></n-checkbox>
     </template>
     </UEModal>
-    <!--<settingModel v-model:show="showModalEVR" >
-      <template #content>
-        <div class="box">
-          <span style="width: 70px;">底座文件：</span>
-          <div class="des">{{defaultConfig.ueDefaultDir}}</div>
-          <span @click="chooseFile('ue')" class="choose">选择底座目录</span>
-        </div>
-        <br />
-        <div class="box">
-          <span style="width: 70px;">场景文件：</span>
-          <div class="des">{{defaultConfig.evrDefaultDir}}</div>
-          <span @click="chooseFile('scene')" class="choose">选择场景目录</span>
-        </div>
-      </template>
-    </settingModel> -->
   </div>
 </template>
 
@@ -130,7 +105,7 @@ const showModalEVR = ref(false)
 const showModalUE = ref(false)
 const showModalMangage = ref(false)
 const openUE = ref(true)
-const openTurn = ref(false)
+const openTurn = ref(true)
 // const serverPath = ".\\resources\\推流综合服务器"
 const serverPath = "..\\推流综合服务器"
 
@@ -232,10 +207,12 @@ watchEffect(async() => {
     }
   }
 })
+const finishGetConfig = ref(false)
 const initConfig = () => {
   // getCofig('IP').then(d => ip.value = d)
   console.log('init----------------->')
   getCofig('CONFIG', serverJSONPath).then(d => {
+    finishGetConfig.value = true
     ip.value = d.LocalIP
 
     // 这里还有ueDefaultDir, evrDefaultDir的数据 可以用来回显

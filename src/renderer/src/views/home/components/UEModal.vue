@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-30 15:21:31
+ * @LastEditTime: 2023-07-03 17:01:46
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -112,15 +112,17 @@
   }]
   onMounted(() => {
     turnRef.value = props.openTurn
-    console.log(props.showModal,props.defaultConfig?.MatchmakerType)
+    console.log(props.defaultConfig?.MatchmakerType)
     // 如果有MatchmakerType
     if(props.defaultConfig?.MatchmakerType){
       value.value = props.defaultConfig?.MatchmakerType
     }else{
       if(props.defaultConfig?.MatchmakerAddress?.startsWith('192')){
         value.value = 'local'
+        props.defaultConfig.MatchmakerType = 'local'
       }else{
         value.value = 'mx'
+        props.defaultConfig.MatchmakerType = 'mx'
       }
     }
   })
