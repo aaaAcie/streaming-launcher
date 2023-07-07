@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-07-03 17:03:27
+ * @LastEditTime: 2023-07-06 16:44:07
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -176,9 +176,11 @@ watchEffect(async() => {
   }
   if (keyMsg.value[leng-1].includes('Streamer connected:')) {
     console.log(keyMsg.value[leng-1])
-    console.log('---------------------------------------')
+    console.log('-----------提醒前端可以开始推流连接----------------',defaultConfig.value.HttpPort)
     // 提醒前端可以开始推流连接
-    notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
+    setTimeout(() => {
+      notifyIPC('startStreaming',clientId.value,defaultConfig.value.HttpPort)
+    }, 2000)
   } else if (keyMsg.value[leng-1].includes('PID:')) {
     let str = keyMsg.value[leng-1]
     let pidInfo = str.split('--')
@@ -377,7 +379,7 @@ const dealOpenServer = async() => {
   return true
 }
 const dealOpenUE = (pid) => {
-  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
+  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest','-ResX=1920','-ResY=1080','-PixelStreamingWebRTCDisableReceiveAudio','-PixelStreamingEncoderMaxQP=20']
   cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
   if (openUE.value) {
     // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
