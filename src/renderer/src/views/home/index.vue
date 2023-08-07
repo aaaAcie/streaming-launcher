@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-07-06 16:44:07
+ * @LastEditTime: 2023-07-28 17:58:19
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -73,7 +73,7 @@
   <div>
     <EVRModal v-model:show="showModalEVR" :UEfile="UEfile" :defaultConfig="defaultConfig"></EVRModal>
     <!-- <UEModal v-model:show="showModalUE" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value"></UEModal> -->
-    <UEModal v-if="finishGetConfig" v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" :UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
+    <UEModal v-if="finishGetConfig" v-model:show="showModalUE" :showModal="showModalUE"  @setShowValue="setShowValue" v-model:UEfile="UEfile" :defaultConfig="defaultConfig" :openTurn="openTurn.value">
     <template #checkbox>
       <n-checkbox v-model:checked="openTurn" :style="checkboxStyle" style="padding-right: 2px;"></n-checkbox>
     </template>
@@ -214,7 +214,7 @@ const initConfig = () => {
   // getCofig('IP').then(d => ip.value = d)
   console.log('init----------------->')
   getCofig('CONFIG', serverJSONPath).then(d => {
-    finishGetConfig.value = true
+    // finishGetConfig.value = true
     ip.value = d.LocalIP
 
     // 这里还有ueDefaultDir, evrDefaultDir的数据 可以用来回显
@@ -231,6 +231,7 @@ const initConfig = () => {
 
   // 选择ue的windows文件夹 将会自动寻找到/MxWorld/Binaries/Win64里的exe文件，才能做到关闭启动器，把ue一起关闭。
   getCofig('defaultPath').then(fileData => {
+    finishGetConfig.value = true
     // 根据ueDefaultDir去设置UEfile
     UEfile.value = fileData
     console.log(UEfile.value)
@@ -246,6 +247,10 @@ watchEffect(() => {
     }, 3000)
   }
 })
+// watchEffect(() => {
+//   console.log('change-------->',defaultConfig.value)
+//   console.log('change-------->',UEfile.value)
+// })
 watchEffect(() => {
   if (defaultConfig.value.MatchmakerAddress) {
     getRightUrlFromWeb.fullUrl = [defaultConfig.value.MatchmakerAddress, defaultConfig.value.managerPort]
@@ -271,7 +276,9 @@ const handleJump = async(data) => {
     dealOpenServer()
   }
 };
-
+setTimeout(() => {
+  initConfig()
+}, 1000)
 
 const chooseFile = (name) => {
   if(name==='ue'){
@@ -379,7 +386,7 @@ const dealOpenServer = async() => {
   return true
 }
 const dealOpenUE = (pid) => {
-  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest','-ResX=1920','-ResY=1080','-PixelStreamingWebRTCDisableReceiveAudio','-PixelStreamingEncoderMaxQP=20']
+  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest','-ResX=1920','-ResY=1080','-PixelStreamingWebRTCDisableReceiveAudio','-PixelStreamingEncoderMaxQP=20','-RenderOffscreen']
   cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
   if (openUE.value) {
     // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);

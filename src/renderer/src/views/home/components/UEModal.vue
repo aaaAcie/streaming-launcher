@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-06-19 15:53:23
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-07-03 17:01:46
+ * @LastEditTime: 2023-07-17 10:14:50
  * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\components\UEModal.vue
  * @Description: 
  * 
@@ -126,30 +126,32 @@
       }
     }
   })
-// 更新Matchmaker的配置
-const handleChangeRaido = () => {
-  if (value.value === 'mx') {
-    props.defaultConfig.MatchmakerAddress = "115.238.181.246"
-    props.defaultConfig.MatchmakerPort = "12002"
-    props.defaultConfig.managerPort = "12001"
-  }else if(value.value === 'local'){
-    // props.defaultConfig.MatchmakerAddress = "192.168.2.128"
-    props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
-    props.defaultConfig.MatchmakerPort = "9990"
-    props.defaultConfig.managerPort = "83"
+  // 更新Matchmaker的配置
+  const handleChangeRaido = () => {
+    if (value.value === 'mx') {
+      props.defaultConfig.MatchmakerAddress = "115.238.181.246"
+      props.defaultConfig.MatchmakerPort = "12002"
+      props.defaultConfig.managerPort = "12001"
+    }else if(value.value === 'local'){
+      // props.defaultConfig.MatchmakerAddress = "192.168.2.128"
+      props.defaultConfig.MatchmakerAddress = props.defaultConfig.LocalIP
+      props.defaultConfig.MatchmakerPort = "9990"
+      props.defaultConfig.managerPort = "83"
+    }
+    props.defaultConfig.MatchmakerType = value.value
+    console.log('将matchmakertype更新为, ', value.value)
   }
-  props.defaultConfig.MatchmakerType = value.value
-  console.log('将matchmakertype更新为, ', value.value)
-}
-  const emit = defineEmits(['setShowValue'])
+  const emit = defineEmits(['setShowValue','update:UEfile'])
 
   const chooseFile = (name) => {
     if(name==='ue'){
       // 选择ue的windows文件夹 将会自动寻找到/MxWorld/Binaries/Win64里的exe文件，才能做到关闭启动器，把ue一起关闭。
       getCofig('DIALOG').then(fileData => {
-        props.UEfile.value = fileData
+        // props.UEfile.value = fileData
+        // props.UEfile = fileData
+        emit('update:UEfile', fileData)
         props.defaultConfig.ueDefaultDir = fileData.selectedDir
-        console.log(props.UEfile.value)
+        console.log(props.UEfile)
       })
     }else if(name==='scene'){
       getDirectory(name).then(fileData => {

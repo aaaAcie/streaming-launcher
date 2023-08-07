@@ -40,12 +40,14 @@
       required: true
     }
   })
+  const emit = defineEmits(['update:UEfile'])
   // 触发父组件
   const chooseFile = (name) => {
     if(name==='ue'){
       // 选择ue的windows文件夹 将会自动寻找到/MxWorld/Binaries/Win64里的exe文件，才能做到关闭启动器，把ue一起关闭。
       getCofig('DIALOG').then(fileData => {
-        props.UEfile.value = fileData
+        // props.UEfile.value = fileData
+        emit('update:UEfile', fileData)
         props.defaultConfig.ueDefaultDir = fileData.selectedDir
         console.log(props.UEfile.value)
       })
