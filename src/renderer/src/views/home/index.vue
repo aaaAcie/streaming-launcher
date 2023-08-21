@@ -2,8 +2,8 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-06-29 10:14:09
- * @FilePath: \mx\UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
+ * @LastEditTime: 2023-08-21 09:40:04
+ * @FilePath: \UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
 -->
@@ -23,7 +23,7 @@
   <svg class="hero-logo" viewBox="0 0 900 300">
     <use xlink:href="@/assets/icons.svg#electron" />
   </svg>
-  <h2 class="hero-text">美象数字孪生平台</h2>
+  <h2 class="hero-text">数字孪生平台</h2>
   <p class="hero-tagline">
     当前IP为
     <code>{{ ip }}</code>

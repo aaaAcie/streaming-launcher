@@ -1,7 +1,7 @@
 {
   "name": "mx-paas-launcher",
   "version": "1.8.0",
-  "description": "美象数字孪生平台启动器",
+  "description": "数字孪生平台启动器",
   "main": "./out/main/index.js",
   "author": "Acie",
   "homepage": "https://www.meixxx.com",
