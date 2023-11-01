@@ -2,8 +2,8 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-08-21 09:40:04
- * @FilePath: \UE-launcher3\electron-app\src\renderer\src\views\home\index.vue
+ * @LastEditTime: 2023-09-12 11:17:15
+ * @FilePath: \electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
 -->
@@ -394,7 +394,7 @@ const dealOpenServer = async() => {
   return true
 }
 const dealOpenUE = (pid) => {
-  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
+  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest','-RenderOffscreen']
   cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
   if (openUE.value) {
     // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
