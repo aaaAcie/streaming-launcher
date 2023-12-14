@@ -2,7 +2,7 @@
  * @Author: 徐亦快 913587892@qq.com
  * @Date: 2023-05-30 15:31:30
  * @LastEditors: 徐亦快 913587892@qq.com
- * @LastEditTime: 2023-09-12 11:17:15
+ * @LastEditTime: 2023-12-12 17:31:53
  * @FilePath: \electron-app\src\renderer\src\views\home\index.vue
  * @Description: 
  * 
@@ -60,6 +60,7 @@
         <h2 class="title">推流服务器</h2>
         <div class="checkbox">
           <n-checkbox v-model:checked="openUE" class="info" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">同步开启底座</n-checkbox>
+          <n-checkbox v-model:checked="renderOffscreen" class="info" style="--n-text-color: #c2f5ff;--n-color:#2f3241;--n-border: 1px solid #c2f5ff">RenderOffscreen</n-checkbox>
           <!-- <span @click="chooseFile('ue')" class="choose">选择目录</span> -->
         </div>
         <div class="btns">
@@ -130,6 +131,7 @@ const showModalEVR = ref(false)
 const showModalUE = ref(false)
 const showModalMangage = ref(false)
 const openUE = ref(true)
+const renderOffscreen = ref(true)
 const openTurn = ref(true)
 // const serverPath = ".\\resources\\推流综合服务器"
 const serverPath = "..\\推流综合服务器"
@@ -394,11 +396,14 @@ const dealOpenServer = async() => {
   return true
 }
 const dealOpenUE = (pid) => {
-  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest','-RenderOffscreen']
+  let cmdArray2 = ['-AudioMixer', '-PixelStreamingIP=127.0.0.1', '-PixelStreamingPort=8888', '-LocalTest']
   cmdArray2[2] = '-PixelStreamingPort=' + defaultConfig.value.StreamerPort
+  if(renderOffscreen.value){
+    cmdArray2.push('-RenderOffscreen')
+  }
   if (openUE.value) {
     // openEXE2("MxWorld.exe", ".\\resources\\Windows", cmdArray2);
-    console.log('打开ue----------',UEfile.value,' cirrus已开在：',pid);
+    console.log('打开ue----------',UEfile.value,' cirrus已开在：',pid,'参数为',cmdArray2);
     openEXE2(UEfile.value.exeFile, UEfile.value.fullPath, cmdArray2, {port:defaultConfig.value.HttpPort, address:ip.value});
   }
 }
@@ -472,6 +477,8 @@ const openEXE2 = (cmdStr, cmdPath = "", cmdArray = [], updateConfig={}) => {
   position: absolute;
   top: 88px;
   right: 7px;
+  display: flex;
+  flex-direction: column;
 }
 .choose {
   text-decoration: underline;
